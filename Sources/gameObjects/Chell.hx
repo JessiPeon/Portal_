@@ -19,8 +19,9 @@ class Chell extends Entity {
 	public var collision:CollisionBox;
 	public var projectionCollision:CollisionGroup;
 	public var blueCollision:CollisionGroup;
+	public var orangeCollision:CollisionGroup;
 	public var bluePortal:BluePortal;
-	// var orangePortal:OrangePortal = null;
+	 var orangePortal:OrangePortal = null;
 	var maxSpeed = 200;
 	var facingDir:FastVector2 = new FastVector2(1,0);
 	static var maxLife = 10000;
@@ -53,7 +54,7 @@ class Chell extends Entity {
 		
 		projectionCollision=new CollisionGroup();
 		blueCollision=new CollisionGroup();
-
+		orangeCollision=new CollisionGroup();
 	}
 
 	override function update(dt:Float) {
@@ -69,8 +70,13 @@ class Chell extends Entity {
 	}
 
 	inline function shoot() {
-		if (Input.i.isKeyCodePressed(KeyCode.X)) {
-			var projection:Projection = new Projection(collision.x + collision.width * 0.5, collision.y + collision.height * 0.5, facingDir,projectionCollision);
+		if (Input.i.isKeyCodePressed(GlobalGameData.blue)) {
+			var projection:Projection = new Projection(collision.x + collision.width * 0.5, collision.y + collision.height * 0.5, facingDir,GlobalGameData.blue,projectionCollision);
+			addChild(projection);
+		}
+
+		if (Input.i.isKeyCodePressed(GlobalGameData.orange)) {
+			var projection:Projection = new Projection(collision.x + collision.width * 0.5, collision.y + collision.height * 0.5, facingDir,GlobalGameData.orange,projectionCollision);
 			addChild(projection);
 		}
 	}
@@ -80,7 +86,24 @@ class Chell extends Entity {
 		var currentProjection:Projection = cast projectionsC.userData;
 		var posX:Float = currentProjection.collision.lastX;
 		var posY:Float = currentProjection.collision.lastY;
-		bluePortal = new BluePortal(500, 500,blueCollision);
+		var portal:KeyCode = currentProjection.portal;
+		if (portal == GlobalGameData.blue){
+			if (GlobalGameData.bluePortal != null){
+				GlobalGameData.bluePortal.destroy();
+			}
+			bluePortal = new BluePortal(posX, posY,blueCollision);
+			GlobalGameData.bluePortal = bluePortal;
+			addChild(bluePortal);
+		} else {
+			if (GlobalGameData.orangePortal != null){
+				GlobalGameData.orangePortal.destroy();
+			}
+			orangePortal = new OrangePortal(posX, posY,orangeCollision);
+			GlobalGameData.orangePortal = orangePortal;
+			addChild(orangePortal);
+		}
+		
+
 		currentProjection.destroy();
 	}
 
