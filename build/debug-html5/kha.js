@@ -19738,52 +19738,14 @@ gameObjects_Chell.prototype = $extend(com_framework_utils_Entity.prototype,{
 	,life: null
 	,sideTouching: null
 	,update: function(dt) {
-		if(com_framework_utils_Input.i.isKeyCodePressed(states_GlobalGameData.blue)) {
-			var projection = new gameObjects_Projection(this.collision.x + this.collision.width * 0.5,this.collision.y + this.collision.height * 0.5,this.facingDir,states_GlobalGameData.blue,this.projectionCollision);
-			this.addChild(projection);
-		}
-		if(com_framework_utils_Input.i.isKeyCodePressed(states_GlobalGameData.orange)) {
-			var projection = new gameObjects_Projection(this.collision.x + this.collision.width * 0.5,this.collision.y + this.collision.height * 0.5,this.facingDir,states_GlobalGameData.orange,this.projectionCollision);
-			this.addChild(projection);
-		}
+		this.shoot();
 		com_framework_utils_Entity.prototype.update.call(this,dt);
 		if(this.life < gameObjects_Chell.maxLife && this.life > 0) {
 			this.life += 1;
 		}
-		if(com_collision_platformer_CollisionEngine.collide(states_GlobalGameData.worldMap.collision,this.projectionCollision)) {
-			var worldC = states_GlobalGameData.worldMap.collision;
-			var currentProjection = this.projectionCollision.userData;
-			if(currentProjection != null) {
-				var side = 99;
-				if(currentProjection.collision.isTouching(8)) {
-					side = 8;
-				} else if(currentProjection.collision.isTouching(4)) {
-					side = 4;
-				} else if(currentProjection.collision.isTouching(1)) {
-					side = 1;
-				} else if(currentProjection.collision.isTouching(2)) {
-					side = 2;
-				}
-				var posX = currentProjection.collision.lastX;
-				var posY = currentProjection.collision.lastY;
-				var portal = currentProjection.portal;
-				if(portal == states_GlobalGameData.blue) {
-					if(states_GlobalGameData.bluePortal != null) {
-						states_GlobalGameData.bluePortal.destroy();
-					}
-					this.bluePortal = new gameObjects_BluePortal(posX,posY,this.blueCollision,side);
-					states_GlobalGameData.bluePortal = this.bluePortal;
-					this.addChild(this.bluePortal);
-				} else {
-					if(states_GlobalGameData.orangePortal != null) {
-						states_GlobalGameData.orangePortal.destroy();
-					}
-					this.orangePortal = new gameObjects_OrangePortal(posX,posY,this.orangeCollision,side);
-					states_GlobalGameData.orangePortal = this.orangePortal;
-					this.addChild(this.orangePortal);
-				}
-				currentProjection.destroy();
-			}
+		com_collision_platformer_CollisionEngine.overlap(states_GlobalGameData.worldMap.collision,this.projectionCollision,$bind(this,this.portalOnWall));
+		if(this.projectionCollision != null) {
+			this.collidePortal(states_GlobalGameData.worldMap.collision,this.projectionCollision);
 		}
 		if(this.bluePortal != null && this.orangePortal != null) {
 			com_collision_platformer_CollisionEngine.overlap(this.collision,this.orangeCollision,$bind(this,this.chellVsOrangePortal));
@@ -19794,38 +19756,7 @@ gameObjects_Chell.prototype = $extend(com_framework_utils_Entity.prototype,{
 	}
 	,collidePortal: function(worldC,projectionsC,aCallBack) {
 		var c = worldC.collide(projectionsC,aCallBack);
-		var currentProjection = projectionsC.userData;
-		if(currentProjection != null) {
-			var side = 99;
-			if(currentProjection.collision.isTouching(8)) {
-				side = 8;
-			} else if(currentProjection.collision.isTouching(4)) {
-				side = 4;
-			} else if(currentProjection.collision.isTouching(1)) {
-				side = 1;
-			} else if(currentProjection.collision.isTouching(2)) {
-				side = 2;
-			}
-			var posX = currentProjection.collision.lastX;
-			var posY = currentProjection.collision.lastY;
-			var portal = currentProjection.portal;
-			if(portal == states_GlobalGameData.blue) {
-				if(states_GlobalGameData.bluePortal != null) {
-					states_GlobalGameData.bluePortal.destroy();
-				}
-				this.bluePortal = new gameObjects_BluePortal(posX,posY,this.blueCollision,side);
-				states_GlobalGameData.bluePortal = this.bluePortal;
-				this.addChild(this.bluePortal);
-			} else {
-				if(states_GlobalGameData.orangePortal != null) {
-					states_GlobalGameData.orangePortal.destroy();
-				}
-				this.orangePortal = new gameObjects_OrangePortal(posX,posY,this.orangeCollision,side);
-				states_GlobalGameData.orangePortal = this.orangePortal;
-				this.addChild(this.orangePortal);
-			}
-			currentProjection.destroy();
-		}
+		this.portalOnWall(worldC,projectionsC);
 		return c;
 	}
 	,shoot: function() {

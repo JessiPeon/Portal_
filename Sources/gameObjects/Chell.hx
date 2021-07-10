@@ -64,13 +64,13 @@ class Chell extends Entity {
 		if (life < maxLife && life > 0){
 			life += 1;
 		}
-		//CollisionEngine.overlap(GlobalGameData.worldMap.collision,projectionCollision,portalOnWall);
-		/*if (projectionCollision != null){
+		CollisionEngine.overlap(GlobalGameData.worldMap.collision,projectionCollision,portalOnWall);
+		if (projectionCollision != null){
 			collidePortal(GlobalGameData.worldMap.collision,projectionCollision);
-		}*/
-		if (CollisionEngine.collide(GlobalGameData.worldMap.collision,projectionCollision)){
-			portalOnWall(GlobalGameData.worldMap.collision,projectionCollision);
 		}
+		/*if (CollisionEngine.collide(GlobalGameData.worldMap.collision,projectionCollision)){
+			portalOnWall(GlobalGameData.worldMap.collision,projectionCollision);
+		}*/
 		
 		if (bluePortal != null && orangePortal != null){
 			CollisionEngine.overlap(collision,orangeCollision,chellVsOrangePortal);
@@ -86,7 +86,7 @@ class Chell extends Entity {
 		return c;
 	}
 
-	inline function shoot() {
+	function shoot() {
 		if (Input.i.isKeyCodePressed(GlobalGameData.blue)) {
 			var projection:Projection = new Projection(collision.x + collision.width * 0.5, collision.y + collision.height * 0.5, facingDir,GlobalGameData.blue,projectionCollision);
 			addChild(projection);
@@ -98,7 +98,7 @@ class Chell extends Entity {
 		}
 	}
 
-	inline function portalOnWall(worldC:ICollider,projectionsC:ICollider){
+	function portalOnWall(worldC:ICollider,projectionsC:ICollider){
 		//var currentTile:CollisionTileMap = cast GlobalGameData.worldMap.collision.userData;
 		var currentProjection:Projection = cast projectionsC.userData;
 		if (currentProjection != null){
