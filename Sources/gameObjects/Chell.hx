@@ -64,7 +64,14 @@ class Chell extends Entity {
 		if (life < maxLife && life > 0){
 			life += 1;
 		}
-		CollisionEngine.overlap(GlobalGameData.worldMap.collision,projectionCollision,portalOnWall);
+		//CollisionEngine.overlap(GlobalGameData.worldMap.collision,projectionCollision,portalOnWall);
+		/*if (projectionCollision != null){
+			collidePortal(GlobalGameData.worldMap.collision,projectionCollision);
+		}*/
+		if (CollisionEngine.collide(GlobalGameData.worldMap.collision,projectionCollision)){
+			portalOnWall(GlobalGameData.worldMap.collision,projectionCollision);
+		}
+		
 		if (bluePortal != null && orangePortal != null){
 			CollisionEngine.overlap(collision,orangeCollision,chellVsOrangePortal);
 			CollisionEngine.overlap(collision,blueCollision,chellVsBluePortal);
@@ -72,6 +79,11 @@ class Chell extends Entity {
 		CollisionEngine.overlap(GlobalGameData.gatewayCollision,projectionCollision,deleteProyection);
 		collision.update(dt);
 
+	}
+	function collidePortal(worldC:ICollider, projectionsC:ICollider, aCallBack:ICollider->ICollider->Void = null):Bool {
+		var c:Bool = worldC.collide(projectionsC, aCallBack);
+		portalOnWall(worldC,projectionsC);
+		return c;
 	}
 
 	inline function shoot() {
@@ -89,7 +101,7 @@ class Chell extends Entity {
 	inline function portalOnWall(worldC:ICollider,projectionsC:ICollider){
 		//var currentTile:CollisionTileMap = cast GlobalGameData.worldMap.collision.userData;
 		var currentProjection:Projection = cast projectionsC.userData;
-		
+		if (currentProjection != null){
 		var side:Int = 99;
 		
 		if (currentProjection.collision.isTouching(Sides.BOTTOM)) {
@@ -127,6 +139,7 @@ class Chell extends Entity {
 		
 
 		currentProjection.destroy();
+		}
 	}
 
 	inline function sidePortal(proj:Projection){

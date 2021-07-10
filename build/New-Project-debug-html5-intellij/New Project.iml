@@ -15,8 +15,8 @@
     <output url="file://$MODULE_DIR$/../debug-html5" />
     <exclude-output />
     <content url="file://$MODULE_DIR$/../..">
-      <sourceFolder url="file://c:\Users\jessi\.vscode\extensions\kodetech.kha-21.6.0\Kha\Sources" isTestSource="false" />
-      <sourceFolder url="file://c:\Users\jessi\.vscode\extensions\kodetech.kha-21.6.0\Kha\Backends\HTML5" isTestSource="false" />
+      <sourceFolder url="file://c:\Users\jessi\.vscode\extensions\kodetech.kha-21.7.0\Kha\Sources" isTestSource="false" />
+      <sourceFolder url="file://c:\Users\jessi\.vscode\extensions\kodetech.kha-21.7.0\Kha\Backends\HTML5" isTestSource="false" />
       <sourceFolder url="file://C:\Users\jessi\Desktop\Videojuegos\ORT\portalObligatorio\portal\Sources" isTestSource="false" />
       <sourceFolder url="file://C:\Users\jessi\Desktop\Videojuegos\ORT\portalObligatorio\portal\khawy\Libraries\hxGeomAlgo\Sources" isTestSource="false" />
       <sourceFolder url="file://C:\Users\jessi\Desktop\Videojuegos\ORT\portalObligatorio\portal\khawy\Libraries\Format\Sources" isTestSource="false" />

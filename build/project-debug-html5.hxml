@@ -1,5 +1,5 @@
--cp c:\Users\jessi\.vscode\extensions\kodetech.kha-21.6.0\Kha\Sources
--cp c:\Users\jessi\.vscode\extensions\kodetech.kha-21.6.0\Kha\Backends\HTML5
+-cp c:\Users\jessi\.vscode\extensions\kodetech.kha-21.7.0\Kha\Sources
+-cp c:\Users\jessi\.vscode\extensions\kodetech.kha-21.7.0\Kha\Backends\HTML5
 -cp C:\Users\jessi\Desktop\Videojuegos\ORT\portalObligatorio\portal\Sources
 -cp C:\Users\jessi\Desktop\Videojuegos\ORT\portalObligatorio\portal\khawy\Libraries\hxGeomAlgo\Sources
 -cp C:\Users\jessi\Desktop\Videojuegos\ORT\portalObligatorio\portal\khawy\Libraries\Format\Sources

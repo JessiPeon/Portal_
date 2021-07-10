@@ -258,6 +258,7 @@ class GameState extends State {
 			//currentButton.gateway.display.timeline.playAnimation("open",false);
 			currentButton.gateway.openGateway();
 		//}
+		currentButton.destroy();
 		
 
 	}
