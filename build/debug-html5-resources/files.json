@@ -257,6 +257,50 @@
 			"types": []
 		},
 		{
+			"name": "boton1",
+			"files": [
+				"boton1.png"
+			],
+			"file_sizes": [
+				237
+			],
+			"type": "image",
+			"original_width": 32,
+			"original_height": 32
+		},
+		{
+			"name": "boton1_xcf",
+			"files": [
+				"boton1.xcf"
+			],
+			"file_sizes": [
+				2138
+			],
+			"type": "blob"
+		},
+		{
+			"name": "boton2",
+			"files": [
+				"boton2.png"
+			],
+			"file_sizes": [
+				249
+			],
+			"type": "image",
+			"original_width": 32,
+			"original_height": 32
+		},
+		{
+			"name": "boton2_xcf",
+			"files": [
+				"boton2.xcf"
+			],
+			"file_sizes": [
+				2727
+			],
+			"type": "blob"
+		},
+		{
 			"name": "cake",
 			"files": [
 				"cake.png"
@@ -267,6 +311,28 @@
 			"type": "image",
 			"original_width": 45,
 			"original_height": 45
+		},
+		{
+			"name": "cubo",
+			"files": [
+				"cubo.png"
+			],
+			"file_sizes": [
+				871
+			],
+			"type": "image",
+			"original_width": 90,
+			"original_height": 45
+		},
+		{
+			"name": "cubo_xcf",
+			"files": [
+				"cubo.xcf"
+			],
+			"file_sizes": [
+				4585
+			],
+			"type": "blob"
 		},
 		{
 			"name": "filmGrain_frag",
@@ -473,6 +539,28 @@
 			"type": "image",
 			"original_width": 225,
 			"original_height": 180
+		},
+		{
+			"name": "laser",
+			"files": [
+				"laser.png"
+			],
+			"file_sizes": [
+				237
+			],
+			"type": "image",
+			"original_width": 32,
+			"original_height": 32
+		},
+		{
+			"name": "laser_xcf",
+			"files": [
+				"laser.xcf"
+			],
+			"file_sizes": [
+				2721
+			],
+			"type": "blob"
 		},
 		{
 			"name": "mainfont",
@@ -1332,6 +1420,28 @@
 			]
 		},
 		{
+			"name": "puerta",
+			"files": [
+				"puerta.png"
+			],
+			"file_sizes": [
+				3071
+			],
+			"type": "image",
+			"original_width": 200,
+			"original_height": 180
+		},
+		{
+			"name": "puerta_xcf",
+			"files": [
+				"puerta.xcf"
+			],
+			"file_sizes": [
+				64324
+			],
+			"type": "blob"
+		},
+		{
 			"name": "renderAreaTint_frag",
 			"files": [
 				"renderAreaTint.frag.essl",
@@ -1401,7 +1511,7 @@
 				"room1.tmx"
 			],
 			"file_sizes": [
-				12922
+				13803
 			],
 			"type": "blob"
 		},
@@ -2101,7 +2211,7 @@
 				"tilesPortal.png"
 			],
 			"file_sizes": [
-				2724
+				2437
 			],
 			"type": "image",
 			"original_width": 64,
@@ -2123,7 +2233,7 @@
 				"tilesPortal.xcf"
 			],
 			"file_sizes": [
-				14433
+				14686
 			],
 			"type": "blob"
 		},

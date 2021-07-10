@@ -19,11 +19,12 @@ class Portal extends Entity{
 	public var display:RectangleDisplay;
 	public var collision:CollisionBox;
 	public var detect:Bool;
+	public var side:Int;
 	var facingDir:FastVector2;
 	var facingDir2:FastVector2;
 	var death:Bool;
 
-	public function new(x:Float,y:Float,groupCollision:CollisionGroup) {
+	public function new(x:Float,y:Float,groupCollision:CollisionGroup,sideP:Int) {
         super();
 
 		facingDir = new FastVector2(-1,0);
@@ -35,7 +36,7 @@ class Portal extends Entity{
 		display.scaleX = 10;
 		display.scaleY = 10;
 		GlobalGameData.simulationLayer.addChild(display);
-
+		side = sideP;
 		collision = new CollisionBox();
 		collision.width = display.width();
 		collision.height = display.height();

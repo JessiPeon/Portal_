@@ -1,5 +1,6 @@
 package states;
 
+import com.collision.platformer.CollisionGroup;
 import kha.input.KeyCode;
 import gameObjects.BluePortal;
 import gameObjects.OrangePortal;
@@ -14,6 +15,7 @@ class GlobalGameData {
 	static public var worldMap:Tilemap;
 	static public var bluePortal:BluePortal = null;
 	static public var orangePortal:OrangePortal = null;
+	static public var gatewayCollision:CollisionGroup;
 	static public var blue:KeyCode = KeyCode.X; 
 	static public var orange:KeyCode = KeyCode.Z; 
     //static public var screenWidth:Int = 1280;

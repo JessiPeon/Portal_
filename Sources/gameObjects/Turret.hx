@@ -62,6 +62,8 @@ class Turret extends Entity {
 		}
 
 		CollisionEngine.overlap(GlobalGameData.chell.collision,bulletsCollision,chellVsBullet);
+		CollisionEngine.overlap(GlobalGameData.gatewayCollision,bulletsCollision,deleteBullet);
+		CollisionEngine.overlap(GlobalGameData.worldMap.collision,bulletsCollision,deleteBullet);
 
 		super.update(dt);
 	}
@@ -86,6 +88,11 @@ class Turret extends Entity {
 		GlobalGameData.chell.damage();
 		currentBullet.destroy();
 	}
+
+	function deleteBullet(wallC:ICollider, bulletC:ICollider) {
+		var currentBullet:Bullet = cast bulletC.userData;
+		currentBullet.destroy();
+	}
 	
 
     override function render() {
@@ -101,6 +108,7 @@ class Turret extends Entity {
 	}
 
 	public function damage() {
+		bulletsCollision.clear();
 		display.timeline.playAnimation("fall",false);
         display.timeline.playAnimation("death",false);
 		death = true;

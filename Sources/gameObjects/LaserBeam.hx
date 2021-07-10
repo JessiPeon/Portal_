@@ -9,12 +9,12 @@ import com.gEngine.helpers.RectangleDisplay;
 import com.framework.utils.Entity;
 import com.gEngine.display.Sprite;
 
-class Bullet extends Entity {
+class LaserBeam extends Entity {
 	var display:RectangleDisplay;
 	var collision:CollisionBox;
-	var width:Int = 5;
-	var height:Int = 5;
-	var speed:Float = 500;
+	var width:Int = 25;
+	var height:Int = 50;
+	var speed:Float = 3000;
 	var time:Float = 0;
 
 	public function new(x:Float, y:Float, dir:FastVector2,collisionGroup:CollisionGroup) {
@@ -40,7 +40,7 @@ class Bullet extends Entity {
 		time += dt;
 		super.update(dt);
 		collision.update(dt);
-		if (time > 0.5) {
+		if (time > 4) {
 			die();
 		}
 	}

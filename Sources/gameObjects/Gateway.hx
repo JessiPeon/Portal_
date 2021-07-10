@@ -14,57 +14,50 @@ import com.collision.platformer.CollisionGroup;
 import kha.math.FastVector2;
 import kha.input.KeyCode;
 
-class Laser extends Entity {
+class Gateway extends Entity {
     public var display:Sprite;
 	public var collision:CollisionBox;
-	public var laserCollision:CollisionGroup;
-	var facingDir:FastVector2 = new FastVector2(0,-1);
+	public var open:Bool;
 
     public function new(x:Float,y:Float,groupCollision:CollisionGroup) {
         super();
-		display = new Sprite("laser");
+		display = new Sprite("puerta");
 		display.smooth = false;
+		open = false;
 		GlobalGameData.simulationLayer.addChild(display);
 		collision = new CollisionBox();
-		collision.width = display.width()*0.5;
-		collision.height = display.height()*0.5;
+		collision.width = display.width()*0.25;
+		collision.height = display.height();
 		display.pivotX=display.width()*0.5;
-		display.offsetY = -display.height()*0.5;
-		display.offsetX = -display.width()*0.25;
+		display.offsetY = 0;
+		display.offsetX = -display.width()*0.39;
 
         display.scaleX = display.scaleY = 1;
 		collision.x=x;
 		collision.y=y;
-
+        collision.staticObject=true;
 		groupCollision.add(collision);
 		collision.userData = this;
-
-		collision.accelerationY = 2000;
-        laserCollision=new CollisionGroup();
 		
     }
 
+
     override function update(dt:Float) {
-		shoot();
-
 		super.update(dt);
-	}
-
-
-	inline function shoot() {
-		var laserBeam:LaserBeam = new LaserBeam(collision.x + collision.width * 0.5, collision.y + collision.height * 0.5, facingDir,laserCollision);
-		addChild(laserBeam);
-	}
-
-	function deleteBullet(wallC:ICollider, bulletC:ICollider) {
-		var currentBullet:Bullet = cast bulletC.userData;
-		currentBullet.destroy();
+        /*if (open) {
+            display.timeline.playAnimation("open",false);
+        }*/
+        collision.update(dt);
 	}
 	
-
-    override function render() {
+	override function render() {
 		super.render();
-        
+        if (!open) {
+            display.timeline.playAnimation("idle");
+        } else {
+            //display.visible = false;
+        }
+		//
 		display.x = collision.x;
 		display.y = collision.y;
 	}
@@ -75,4 +68,23 @@ class Laser extends Entity {
         collision.removeFromParent();
 	}
 
+    public function openGateway() {
+        open = true;
+        display.timeline.playAnimation("open",false);
+		super.destroy();
+        collision.removeFromParent();
+	}
+
+    public function closeGateway(groupCollision:CollisionGroup) {
+        open = false;
+		collision = new CollisionBox();
+		collision.width = display.width()*0.25;
+		collision.height = display.height();
+
+		collision.x=display.x;
+		collision.y=display.y;
+        collision.staticObject=true;
+		groupCollision.add(collision);
+		collision.userData = this;
+	}
 }

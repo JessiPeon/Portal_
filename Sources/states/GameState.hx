@@ -1,5 +1,7 @@
 package states;
 
+import com.loading.basicResources.ImageLoader;
+import gameObjects.Gateway;
 import gameObjects.OrangePortal;
 import gameObjects.BluePortal;
 import com.gEngine.helpers.Screen;
@@ -22,6 +24,10 @@ import com.collision.platformer.CollisionEngine;
 import com.collision.platformer.CollisionGroup;
 import com.collision.platformer.ICollider;
 import gameObjects.Chell;
+import gameObjects.ButtonGateway;
+import gameObjects.ButtonLaser;
+import gameObjects.Laser;
+import gameObjects.Cube;
 import com.loading.basicResources.TilesheetLoader;
 import com.loading.basicResources.SpriteSheetLoader;
 import com.gEngine.display.Layer;
@@ -31,15 +37,19 @@ import com.loading.basicResources.JoinAtlas;
 import com.loading.Resources;
 import com.framework.utils.State;
 import states.EndGame;
-import states.StartGame;
 
 
 class GameState extends State {
 	var worldMap:Tilemap;
 	var chell:Chell;
 	var turret:Turret;
+	var gateway:Gateway;
 	var bluePortal:BluePortal;
 	var orangePortal:OrangePortal;
+	var buttonGateway:ButtonGateway;
+	var buttonLaser:ButtonLaser;
+	var laser:Laser;
+	var cube:Cube;
 	var simulationLayer:Layer;
 	var touchJoystick:VirtualGamepad;
 	//var tray:helpers.Tray;
@@ -47,9 +57,13 @@ class GameState extends State {
 	var room:String;
 	var winZone:CollisionBox;
 	var turretCollision:CollisionGroup= new CollisionGroup();
+	var gatewayCollision:CollisionGroup= new CollisionGroup();
+	var buttonGatewayCollision:CollisionGroup= new CollisionGroup();
+	var buttonLaserCollision:CollisionGroup= new CollisionGroup();
+	var laserCollision:CollisionGroup= new CollisionGroup();
+	var cubeCollision:CollisionGroup= new CollisionGroup();
 	//var blueCollision:CollisionGroup= new CollisionGroup();
 	// orangeCollision:CollisionGroup= new CollisionGroup();
-	var portalCollision:CollisionGroup= new CollisionGroup();
 	var text:Text;
 
 
@@ -78,13 +92,26 @@ class GameState extends State {
 		]));
 		atlas.add(new SpriteSheetLoader("torreta", 50, 60, 0, [
 			new Sequence("idle", [0]),
-			new Sequence("attack", [1,2]),
+			new Sequence("open", [1,2]),
 			new Sequence("falling", [3]),
 			new Sequence("detect", [0,4]),
 			new Sequence("fall", [5,6,7]),
 			new Sequence("death", [8,9,10,11])
 		]));
+		atlas.add(new SpriteSheetLoader("puerta", 50, 60, 0, [
+			new Sequence("idle", [0]),
+			new Sequence("open", [1,2,3,4,5,6,7,8,9]),
+			new Sequence("close", [8,7,6,5,4,3,2,1,0])
+		]));
+		atlas.add(new ImageLoader("boton2"));
+		atlas.add(new ImageLoader("boton1"));
+		atlas.add(new ImageLoader("laser"));
+		atlas.add(new SpriteSheetLoader("cubo", 45, 45, 0, [
+			new Sequence("idle", [0]),
+			new Sequence("falling", [1])
+		]));
 		resources.add(atlas);
+		
 	}
 
 	override function init() {
@@ -97,13 +124,13 @@ class GameState extends State {
 		text=new Text("Kenney_Thick");
         text.x = Screen.getWidth()*0.5-50;
         text.y = Screen.getHeight()*0.5;
-        text.text="Vida: ";
+        text.text="";
         stage.addChild(text);
 
 		////////////////////////////
 
 		GlobalGameData.simulationLayer = simulationLayer;
-
+		GlobalGameData.gatewayCollision = gatewayCollision;
 		worldMap = new Tilemap("room"+room+"_tmx");
 		worldMap.init(parseTileLayers, parseMapObjects);
 		GlobalGameData.worldMap = worldMap;
@@ -111,7 +138,6 @@ class GameState extends State {
 	
 
 		stage.defaultCamera().limits(32*2, 0, worldMap.widthIntTiles * 32 - 4*32, worldMap.heightInTiles * 32 );
-
 		createTouchJoystick();
 	}
 
@@ -144,12 +170,6 @@ class GameState extends State {
 				chell = new Chell(object.x, object.y);
 				GlobalGameData.chell = chell;
 				addChild(chell);
-/*
-				bluePortal = new BluePortal(object.x - 50, object.y+110,portalCollision);
-				addChild(bluePortal);
-
-				orangePortal = new OrangePortal(object.x + 150, object.y+110,portalCollision);
-				addChild(orangePortal);*/
 			}
 		}else
 		if(compareName(object,"winZone"))
@@ -164,8 +184,26 @@ class GameState extends State {
 			turret = new Turret(object.x, object.y,turretCollision);
 			addChild(turret);
 		}
-
-		
+		if(compareName(object,"puerta")){
+			gateway = new Gateway(object.x+2, object.y-2*object.height+1,gatewayCollision);
+			addChild(gateway);
+		}
+		if(compareName(object,"boton2")){
+			buttonGateway = new ButtonGateway(object.x, object.y-object.height+1,buttonGatewayCollision,gateway);
+			addChild(buttonGateway);
+		}
+		if(compareName(object,"boton1")){
+			buttonLaser = new ButtonLaser(object.x, object.y-object.height+1,buttonLaserCollision);
+			addChild(buttonLaser);
+		}
+		if(compareName(object,"laser")){
+			laser = new Laser(object.x, object.y-object.height+1,laserCollision);
+			addChild(laser);
+		}
+		if(compareName(object,"cubo")){
+			cube = new Cube(object.x, object.y-object.height+1,cubeCollision);
+			addChild(cube);
+		}
 	}
 	inline function compareName(object:TmxObject,name:String) {
 		return object.name.toLowerCase() == name.toLowerCase();
@@ -174,8 +212,9 @@ class GameState extends State {
 	override function update(dt:Float) {
 		super.update(dt);
 		//stage.defaultCamera().setTarget(chell.collision.x, chell.collision.y);
-		//var life:Int = chell.getVida();
+		#if DEBUGDRAW
 		text.text = Std.string(chell.getVida());
+		#end
 
 		if (chell.getVida() <= 0){
 			changeState(new LoseGame());
@@ -183,7 +222,7 @@ class GameState extends State {
 
 		CollisionEngine.collide(chell.collision,worldMap.collision);
 		CollisionEngine.collide(turretCollision,worldMap.collision);
-		CollisionEngine.collide(turretCollision,chell.collision);
+		CollisionEngine.collide(gatewayCollision,chell.collision);
 		if(CollisionEngine.overlap(chell.collision,winZone)){
 			if(room == GlobalGameData.roomFinal){
 				changeState(new EndGame());
@@ -196,8 +235,8 @@ class GameState extends State {
 		}
 		
 		CollisionEngine.overlap(chell.collision,turretCollision,chellVsTurret);
-
-		//CollisionEngine.overlap(chell.collision,portalCollision,chellVsPortal);
+		CollisionEngine.overlap(chell.collision,buttonGatewayCollision,chellVsButtonGateway);
+		
 
 		
 
@@ -210,14 +249,19 @@ class GameState extends State {
 		var currentTurret:Turret = cast turretC.userData;
 		currentTurret.damage();
 	}
+	inline function chellVsButtonGateway(chellC:ICollider,buttonC:ICollider){
+		var currentButton:ButtonGateway = cast buttonC.userData;
+		/*if (currentButton.gateway.open){
+			currentButton.gateway.close();
+		} else {*/
+			//currentButton.gateway.open = true;
+			//currentButton.gateway.display.timeline.playAnimation("open",false);
+			currentButton.gateway.openGateway();
+		//}
+		
 
-	function chellVsPortal(chellC:ICollider, portalC:ICollider) {
-		/*if (bluePortal != null && orangePortal != null){
-
-		}
-		var currentTurret:Turret = cast portalC.userData;
-		currentTurret.damage();*/
 	}
+	
 
 	#if DEBUGDRAW
 	override function draw(framebuffer:kha.Canvas) {

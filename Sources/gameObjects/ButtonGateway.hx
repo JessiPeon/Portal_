@@ -1,5 +1,6 @@
 package gameObjects;
 
+
 import com.collision.platformer.ICollider;
 import com.collision.platformer.CollisionEngine;
 import com.framework.utils.Entity;
@@ -14,57 +15,47 @@ import com.collision.platformer.CollisionGroup;
 import kha.math.FastVector2;
 import kha.input.KeyCode;
 
-class Laser extends Entity {
+class ButtonGateway extends Entity {
     public var display:Sprite;
 	public var collision:CollisionBox;
-	public var laserCollision:CollisionGroup;
-	var facingDir:FastVector2 = new FastVector2(0,-1);
+	public var active:Bool = false;
+	public var gateway:Gateway;
 
-    public function new(x:Float,y:Float,groupCollision:CollisionGroup) {
+
+    public function new(x:Float,y:Float,groupCollision:CollisionGroup,gatewayP:Gateway) {
         super();
-		display = new Sprite("laser");
+		display = new Sprite("boton2");
 		display.smooth = false;
 		GlobalGameData.simulationLayer.addChild(display);
 		collision = new CollisionBox();
-		collision.width = display.width()*0.5;
-		collision.height = display.height()*0.5;
+		collision.width = display.width()*0.25;
+		collision.height = display.height();
 		display.pivotX=display.width()*0.5;
-		display.offsetY = -display.height()*0.5;
-		display.offsetX = -display.width()*0.25;
+		display.offsetY = 0;
+		display.offsetX = -display.width()*0.39;
 
         display.scaleX = display.scaleY = 1;
 		collision.x=x;
 		collision.y=y;
-
+        collision.staticObject=true;
 		groupCollision.add(collision);
 		collision.userData = this;
 
-		collision.accelerationY = 2000;
-        laserCollision=new CollisionGroup();
+		gateway= gatewayP;
 		
     }
 
-    override function update(dt:Float) {
-		shoot();
-
+	override function update(dt:Float) {
 		super.update(dt);
+
+		
+		collision.update(dt);		
 	}
 
 
-	inline function shoot() {
-		var laserBeam:LaserBeam = new LaserBeam(collision.x + collision.width * 0.5, collision.y + collision.height * 0.5, facingDir,laserCollision);
-		addChild(laserBeam);
-	}
 
-	function deleteBullet(wallC:ICollider, bulletC:ICollider) {
-		var currentBullet:Bullet = cast bulletC.userData;
-		currentBullet.destroy();
-	}
-	
-
-    override function render() {
+	override function render() {
 		super.render();
-        
 		display.x = collision.x;
 		display.y = collision.y;
 	}

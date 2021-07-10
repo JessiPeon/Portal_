@@ -25,10 +25,10 @@ class BluePortal extends Portal  {
 	var facingDir2:FastVector2;
 	var death:Bool;*/
 
-    public function new(x:Float,y:Float,groupCollision:CollisionGroup) {
-        super(x,y,groupCollision);
+    public function new(x:Float,y:Float,groupCollision:CollisionGroup,side:Int) {
+        super(x,y,groupCollision,side);
 
-		super.display.setColor(0, 0, 255);
+		this.display.setColor(0, 0, 255);
 		/*facingDir = new FastVector2(-1,0);
 		facingDir2 = new FastVector2(-1,0);
 		death = false;
