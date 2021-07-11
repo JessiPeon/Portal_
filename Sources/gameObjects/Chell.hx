@@ -2,9 +2,7 @@ package gameObjects;
 
 import com.collision.platformer.ICollider;
 import com.collision.platformer.CollisionEngine;
-import kha.input.KeyCode;
 import com.collision.platformer.CollisionGroup;
-import kha.math.FastVector2;
 import com.framework.utils.Input;
 import com.collision.platformer.Sides;
 import com.framework.utils.XboxJoystick;
@@ -13,6 +11,8 @@ import com.collision.platformer.CollisionBox;
 import com.gEngine.display.Sprite;
 import com.framework.utils.Entity;
 import states.GlobalGameData;
+import kha.math.FastVector2;
+import kha.input.KeyCode;
 
 class Chell extends Entity {
 	public var display:Sprite;
@@ -27,6 +27,8 @@ class Chell extends Entity {
 	var facingDir:FastVector2 = new FastVector2(1,0);
 	static var maxLife = 10000;
 	var life = maxLife;
+	var lastAccelerationX:Float;
+	var lastAccelerationY:Float;
 
 	//var lastWallGrabing:Float=0;
 	var sideTouching:Int;
@@ -67,25 +69,33 @@ class Chell extends Entity {
 		}
 		//CollisionEngine.overlap(GlobalGameData.worldMap.collision,projectionCollision,portalOnWall);
 		if (projectionCollision != null){
-			collidePortal(GlobalGameData.worldMap.collision,projectionCollision);
+			collidePortalOnWall(GlobalGameData.worldMap.collision,projectionCollision,portalOnWall);
 		}
 		/*if (CollisionEngine.collide(GlobalGameData.worldMap.collision,projectionCollision)){
 			portalOnWall(GlobalGameData.worldMap.collision,projectionCollision);
 		}*/
+		/*time += dt;
+		if (time > 1 && oppositeDir) {
+			oppositeDir=false;
+		}*/
 		
 		if (bluePortal != null && orangePortal != null){
-			CollisionEngine.overlap(collision,orangeCollision,chellVsOrangePortal);
-			CollisionEngine.overlap(collision,blueCollision,chellVsBluePortal);
+			collideChellVsPortal(collision,orangeCollision,chellVsOrangePortal);
+			collideChellVsPortal(collision,blueCollision,chellVsBluePortal);
 		}
+		lastAccelerationX = collision.accelerationX;
+		lastAccelerationY = collision.accelerationY;
 		CollisionEngine.overlap(GlobalGameData.gatewayCollision,projectionCollision,deleteProyection);
 		collision.update(dt);
 
 	}
-	function collidePortal(worldC:ICollider, projectionsC:ICollider, aCallBack:ICollider->ICollider->Void = null):Bool {
+	function collidePortalOnWall(worldC:ICollider, projectionsC:ICollider, aCallBack:ICollider->ICollider->Void = null):Bool {
 		var c:Bool = worldC.collide(projectionsC, aCallBack);
-		if (c){
-			portalOnWall(worldC,projectionsC);
-		}
+		return c;
+	}
+
+	function collideChellVsPortal(chellC:ICollider, portalC:ICollider, aCallBack:ICollider->ICollider->Void = null):Bool {
+		var c:Bool = chellC.collide(portalC, aCallBack);
 		return c;
 	}
 
@@ -144,46 +154,49 @@ class Chell extends Entity {
 		}
 	}
 
-	inline function sidePortal(proj:Projection){
-		var side:Int = Sides.BOTTOM;
-		/*if (proj.collision.isTouching(Sides.BOTTOM)) {
-			
-		} else*/
-		if (proj.collision.isTouching(Sides.TOP)) {
-			side = Sides.TOP;
-		} else
-		if (proj.collision.isTouching(Sides.LEFT)) {
-			side = Sides.LEFT;
-		} else
-		if (proj.collision.isTouching(Sides.RIGHT)) {
-			side = Sides.RIGHT;
-		} 
-		return side;
-	}
 
 	function chellVsOrangePortal(chellC:ICollider, orangePortalC:ICollider) {
-		if(GlobalGameData.bluePortal.side == Sides.LEFT){
-			collision.accelerationX = maxSpeed;
-		} else
-		if(GlobalGameData.bluePortal.side == Sides.RIGHT){
-			collision.accelerationX = -maxSpeed;
-		} 
-		
 		var posXFin:Float = GlobalGameData.bluePortal.collision.x;
 		var posYFin:Float = GlobalGameData.bluePortal.collision.y;
+		if(GlobalGameData.bluePortal.side == Sides.LEFT){
+			posXFin = posXFin  + 20;
+		} else
+		if(GlobalGameData.bluePortal.side == Sides.RIGHT){
+			posXFin = posXFin - 55;
+		} 
 		changePosition(posXFin,posYFin);
+		collision.velocityX = collision.lastVelocityX;
+		collision.velocityY = collision.lastVelocityY;
+		if(GlobalGameData.orangePortal.side == GlobalGameData.bluePortal.side){
+			collision.velocityX = collision.velocityX * (-1);
+			facingDir.x = facingDir.x * (-1);
+			display.scaleX = display.scaleX*(-1);
+		}
+		//collision.accelerationX = 0;
+		
 	}
 
 	function chellVsBluePortal(chellC:ICollider, bluePortalC:ICollider) {
-		if(GlobalGameData.orangePortal.side == Sides.LEFT){
-			collision.accelerationX = maxSpeed;
-		} else
-		if(GlobalGameData.orangePortal.side == Sides.RIGHT){
-			collision.accelerationX = -maxSpeed;
-		} 
 		var posXFin:Float = GlobalGameData.orangePortal.collision.x;
 		var posYFin:Float = GlobalGameData.orangePortal.collision.y;
+		if(GlobalGameData.orangePortal.side == Sides.LEFT){
+			posXFin = posXFin  + 20;
+		} else
+		if(GlobalGameData.orangePortal.side == Sides.RIGHT){
+			posXFin = posXFin - 55;
+		} 
 		changePosition(posXFin,posYFin);
+		collision.velocityX = collision.lastVelocityX;
+		collision.velocityY = collision.lastVelocityY;
+		collision.accelerationX = lastAccelerationX;
+		collision.accelerationY = lastAccelerationY;
+		if(GlobalGameData.orangePortal.side == GlobalGameData.bluePortal.side){
+			collision.velocityX = collision.velocityX * (-1);
+			facingDir.x = facingDir.x * (-1);
+			display.scaleX = display.scaleX*(-1);
+		}
+		//collision.accelerationX = 0;
+		
 	}
 
 	inline function changePosition(posXFin:Float,posYFin:Float) {
@@ -224,7 +237,7 @@ class Chell extends Entity {
 	}
 
 	public function onButtonChange(id:Int, value:Float) {
-		if (id == XboxJoystick.LEFT_DPAD) {
+		if (id == XboxJoystick.LEFT_DPAD ) {
 			if (value == 1) {
 				collision.accelerationX = -maxSpeed;
 				display.scaleX = Math.abs(display.scaleX);
@@ -236,7 +249,7 @@ class Chell extends Entity {
 				}
 			}
 		}
-		if (id == XboxJoystick.RIGHT_DPAD) {
+		if (id == XboxJoystick.RIGHT_DPAD ) {
 			if (value == 1) {
 				collision.accelerationX = maxSpeed;
 				display.scaleX = -Math.abs(display.scaleX);

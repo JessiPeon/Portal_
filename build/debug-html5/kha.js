@@ -19513,6 +19513,7 @@ var gameObjects_Portal = function(x,y,groupCollision,sideP) {
 	this.collision.height = this.display.height();
 	this.collision.x = x;
 	this.collision.y = y;
+	this.collision.staticObject = true;
 	groupCollision.clear();
 	groupCollision.add(this.collision);
 	this.collision.userData = this;
@@ -19742,6 +19743,8 @@ gameObjects_Chell.prototype = $extend(com_framework_utils_Entity.prototype,{
 	,maxSpeed: null
 	,facingDir: null
 	,life: null
+	,lastAccelerationX: null
+	,lastAccelerationY: null
 	,sideTouching: null
 	,update: function(dt) {
 		this.shoot();
@@ -19750,20 +19753,23 @@ gameObjects_Chell.prototype = $extend(com_framework_utils_Entity.prototype,{
 			this.life += 10;
 		}
 		if(this.projectionCollision != null) {
-			this.collidePortal(states_GlobalGameData.worldMap.collision,this.projectionCollision);
+			this.collidePortalOnWall(states_GlobalGameData.worldMap.collision,this.projectionCollision,$bind(this,this.portalOnWall));
 		}
 		if(this.bluePortal != null && this.orangePortal != null) {
-			com_collision_platformer_CollisionEngine.overlap(this.collision,this.orangeCollision,$bind(this,this.chellVsOrangePortal));
-			com_collision_platformer_CollisionEngine.overlap(this.collision,this.blueCollision,$bind(this,this.chellVsBluePortal));
+			this.collideChellVsPortal(this.collision,this.orangeCollision,$bind(this,this.chellVsOrangePortal));
+			this.collideChellVsPortal(this.collision,this.blueCollision,$bind(this,this.chellVsBluePortal));
 		}
+		this.lastAccelerationX = this.collision.accelerationX;
+		this.lastAccelerationY = this.collision.accelerationY;
 		com_collision_platformer_CollisionEngine.overlap(states_GlobalGameData.gatewayCollision,this.projectionCollision,$bind(this,this.deleteProyection));
 		this.collision.update(dt);
 	}
-	,collidePortal: function(worldC,projectionsC,aCallBack) {
+	,collidePortalOnWall: function(worldC,projectionsC,aCallBack) {
 		var c = worldC.collide(projectionsC,aCallBack);
-		if(c) {
-			this.portalOnWall(worldC,projectionsC);
-		}
+		return c;
+	}
+	,collideChellVsPortal: function(chellC,portalC,aCallBack) {
+		var c = chellC.collide(portalC,aCallBack);
 		return c;
 	}
 	,shoot: function() {
@@ -19810,38 +19816,43 @@ gameObjects_Chell.prototype = $extend(com_framework_utils_Entity.prototype,{
 			currentProjection.die();
 		}
 	}
-	,sidePortal: function(proj) {
-		var side = 8;
-		if(proj.collision.isTouching(4)) {
-			side = 4;
-		} else if(proj.collision.isTouching(1)) {
-			side = 1;
-		} else if(proj.collision.isTouching(2)) {
-			side = 2;
-		}
-		return side;
-	}
 	,chellVsOrangePortal: function(chellC,orangePortalC) {
-		if(states_GlobalGameData.bluePortal.side == 1) {
-			this.collision.accelerationX = this.maxSpeed;
-		} else if(states_GlobalGameData.bluePortal.side == 2) {
-			this.collision.accelerationX = -this.maxSpeed;
-		}
 		var posXFin = states_GlobalGameData.bluePortal.collision.x;
 		var posYFin = states_GlobalGameData.bluePortal.collision.y;
+		if(states_GlobalGameData.bluePortal.side == 1) {
+			posXFin += 20;
+		} else if(states_GlobalGameData.bluePortal.side == 2) {
+			posXFin -= 55;
+		}
 		this.collision.x = posXFin;
 		this.collision.y = posYFin;
+		this.collision.velocityX = this.collision.lastVelocityX;
+		this.collision.velocityY = this.collision.lastVelocityY;
+		if(states_GlobalGameData.orangePortal.side == states_GlobalGameData.bluePortal.side) {
+			this.collision.velocityX *= -1;
+			this.facingDir.x *= -1;
+			this.display.scaleX *= -1;
+		}
 	}
 	,chellVsBluePortal: function(chellC,bluePortalC) {
-		if(states_GlobalGameData.orangePortal.side == 1) {
-			this.collision.accelerationX = this.maxSpeed;
-		} else if(states_GlobalGameData.orangePortal.side == 2) {
-			this.collision.accelerationX = -this.maxSpeed;
-		}
 		var posXFin = states_GlobalGameData.orangePortal.collision.x;
 		var posYFin = states_GlobalGameData.orangePortal.collision.y;
+		if(states_GlobalGameData.orangePortal.side == 1) {
+			posXFin += 20;
+		} else if(states_GlobalGameData.orangePortal.side == 2) {
+			posXFin -= 55;
+		}
 		this.collision.x = posXFin;
 		this.collision.y = posYFin;
+		this.collision.velocityX = this.collision.lastVelocityX;
+		this.collision.velocityY = this.collision.lastVelocityY;
+		this.collision.accelerationX = this.lastAccelerationX;
+		this.collision.accelerationY = this.lastAccelerationY;
+		if(states_GlobalGameData.orangePortal.side == states_GlobalGameData.bluePortal.side) {
+			this.collision.velocityX *= -1;
+			this.facingDir.x *= -1;
+			this.display.scaleX *= -1;
+		}
 	}
 	,changePosition: function(posXFin,posYFin) {
 		this.collision.x = posXFin;
@@ -49715,8 +49726,14 @@ kha_input_Pen.prototype = {
 	notify: function(downListener,upListener,moveListener) {
 		this.notifyWindowed(0,downListener,upListener,moveListener);
 	}
+	,notifyEraser: function(eraserDownListener,eraserUpListener,eraserMoveListener) {
+		this.notifyEraserWindowed(0,eraserDownListener,eraserUpListener,eraserMoveListener);
+	}
 	,remove: function(downListener,upListener,moveListener) {
 		this.removeWindowed(0,downListener,upListener,moveListener);
+	}
+	,removeEraser: function(eraserDownListener,eraserUpListener,eraserMoveListener) {
+		this.removeEraserWindowed(0,eraserDownListener,eraserUpListener,eraserMoveListener);
 	}
 	,notifyWindowed: function(windowId,downListener,upListener,moveListener) {
 		if(downListener != null) {
@@ -49741,6 +49758,29 @@ kha_input_Pen.prototype = {
 			this.windowMoveListeners[windowId].push(moveListener);
 		}
 	}
+	,notifyEraserWindowed: function(windowId,eraserDownListener,eraserUpListener,eraserMoveListener) {
+		if(eraserDownListener != null) {
+			if(this.windowEraserDownListeners == null) {
+				this.windowEraserDownListeners = [];
+			}
+			while(this.windowEraserDownListeners.length <= windowId) this.windowEraserDownListeners.push([]);
+			this.windowEraserDownListeners[windowId].push(eraserDownListener);
+		}
+		if(eraserUpListener != null) {
+			if(this.windowEraserUpListeners == null) {
+				this.windowEraserUpListeners = [];
+			}
+			while(this.windowEraserUpListeners.length <= windowId) this.windowEraserUpListeners.push([]);
+			this.windowEraserUpListeners[windowId].push(eraserUpListener);
+		}
+		if(eraserMoveListener != null) {
+			if(this.windowEraserMoveListeners == null) {
+				this.windowEraserMoveListeners = [];
+			}
+			while(this.windowEraserMoveListeners.length <= windowId) this.windowEraserMoveListeners.push([]);
+			this.windowEraserMoveListeners[windowId].push(eraserMoveListener);
+		}
+	}
 	,removeWindowed: function(windowId,downListener,upListener,moveListener) {
 		if(downListener != null && this.windowDownListeners != null) {
 			if(windowId < this.windowDownListeners.length) {
@@ -49758,9 +49798,29 @@ kha_input_Pen.prototype = {
 			}
 		}
 	}
+	,removeEraserWindowed: function(windowId,eraserDownListener,eraserUpListener,eraserMoveListener) {
+		if(eraserDownListener != null && this.windowEraserDownListeners != null) {
+			if(windowId < this.windowEraserDownListeners.length) {
+				HxOverrides.remove(this.windowEraserDownListeners[windowId],eraserDownListener);
+			}
+		}
+		if(eraserUpListener != null && this.windowEraserUpListeners != null) {
+			if(windowId < this.windowEraserUpListeners.length) {
+				HxOverrides.remove(this.windowEraserUpListeners[windowId],eraserUpListener);
+			}
+		}
+		if(eraserMoveListener != null && this.windowEraserMoveListeners != null) {
+			if(windowId < this.windowEraserMoveListeners.length) {
+				HxOverrides.remove(this.windowEraserMoveListeners[windowId],eraserMoveListener);
+			}
+		}
+	}
 	,windowDownListeners: null
 	,windowUpListeners: null
 	,windowMoveListeners: null
+	,windowEraserDownListeners: null
+	,windowEraserUpListeners: null
+	,windowEraserMoveListeners: null
 	,sendDownEvent: function(windowId,x,y,pressure) {
 		if(this.windowDownListeners != null) {
 			var _g = 0;
@@ -49787,6 +49847,39 @@ kha_input_Pen.prototype = {
 		if(this.windowMoveListeners != null) {
 			var _g = 0;
 			var _g1 = this.windowMoveListeners[windowId];
+			while(_g < _g1.length) {
+				var listener = _g1[_g];
+				++_g;
+				listener(x,y,pressure);
+			}
+		}
+	}
+	,sendEraserDownEvent: function(windowId,x,y,pressure) {
+		if(this.windowEraserDownListeners != null) {
+			var _g = 0;
+			var _g1 = this.windowEraserDownListeners[windowId];
+			while(_g < _g1.length) {
+				var listener = _g1[_g];
+				++_g;
+				listener(x,y,pressure);
+			}
+		}
+	}
+	,sendEraserUpEvent: function(windowId,x,y,pressure) {
+		if(this.windowEraserUpListeners != null) {
+			var _g = 0;
+			var _g1 = this.windowEraserUpListeners[windowId];
+			while(_g < _g1.length) {
+				var listener = _g1[_g];
+				++_g;
+				listener(x,y,pressure);
+			}
+		}
+	}
+	,sendEraserMoveEvent: function(windowId,x,y,pressure) {
+		if(this.windowEraserMoveListeners != null) {
+			var _g = 0;
+			var _g1 = this.windowEraserMoveListeners[windowId];
 			while(_g < _g1.length) {
 				var listener = _g1[_g];
 				++_g;

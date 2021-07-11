@@ -12,12 +12,12 @@
 		<movie minorVersion="0" />
 		<movie platform="JavaScript" />
 		<movie background="#ffffff" />
-		<movie preferredSDK="..\..\..\..\..\..\.vscode\extensions\kodetech.kha-21.7.0\Kha\Tools\haxe" />
+		<movie preferredSDK="..\..\..\..\..\..\.vscode\extensions\kodetech.kha-21.7.1\Kha\Tools\haxe" />
 	</output>
 	<!-- Other classes to be compiled into your SWF -->
 	<classpaths>
-		<class path="..\..\..\..\..\..\.vscode\extensions\kodetech.kha-21.7.0\Kha\Sources" />
-		<class path="..\..\..\..\..\..\.vscode\extensions\kodetech.kha-21.7.0\Kha\Backends\HTML5" />
+		<class path="..\..\..\..\..\..\.vscode\extensions\kodetech.kha-21.7.1\Kha\Sources" />
+		<class path="..\..\..\..\..\..\.vscode\extensions\kodetech.kha-21.7.1\Kha\Backends\HTML5" />
 		<class path="..\Sources" />
 		<class path="..\khawy\Libraries\hxGeomAlgo\Sources" />
 		<class path="..\khawy\Libraries\Format\Sources" />

@@ -32,6 +32,7 @@ class Portal extends Entity{
 		death = false;
 		//display = new Sprite("torreta");
 		display = new RectangleDisplay();
+		
 		//display.setColor(0, 0, 255);
 		display.scaleX = 10;
 		display.scaleY = 10;
@@ -42,7 +43,7 @@ class Portal extends Entity{
 		collision.height = display.height();
 		collision.x=x;
 		collision.y=y;
-
+		collision.staticObject=true;
 		groupCollision.clear();
 		groupCollision.add(collision);
 		collision.userData = this;
