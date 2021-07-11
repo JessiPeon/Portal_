@@ -18,6 +18,7 @@ class GlobalGameData {
 	static public var gatewayCollision:CollisionGroup;
 	static public var blue:KeyCode = KeyCode.X; 
 	static public var orange:KeyCode = KeyCode.Z; 
+	static public var action:KeyCode = KeyCode.A;
     //static public var screenWidth:Int = 1280;
     //static public var screenHeight:Int = 720;
 

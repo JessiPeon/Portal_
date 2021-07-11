@@ -18,6 +18,7 @@ class Laser extends Entity {
     public var display:Sprite;
 	public var collision:CollisionBox;
 	public var laserCollision:CollisionGroup;
+	public var on:Bool = true;
 	var facingDir:FastVector2 = new FastVector2(0,-1);
 
     public function new(x:Float,y:Float,groupCollision:CollisionGroup) {
@@ -45,20 +46,36 @@ class Laser extends Entity {
     }
 
     override function update(dt:Float) {
-		shoot();
-
+		if (on){
+			shoot();
+			CollisionEngine.overlap(GlobalGameData.worldMap.collision,laserCollision,laserOnWall);
+			collideLaser(GlobalGameData.chell.collision, laserCollision);
+		}
+		
 		super.update(dt);
 	}
 
 
 	inline function shoot() {
-		var laserBeam:LaserBeam = new LaserBeam(collision.x + collision.width * 0.5, collision.y + collision.height * 0.5, facingDir,laserCollision);
+		var laserBeam:LaserBeam = new LaserBeam(collision.x + collision.width * 0.5, collision.y+ collision.height *0.5+3, facingDir,laserCollision);
 		addChild(laserBeam);
 	}
 
-	function deleteBullet(wallC:ICollider, bulletC:ICollider) {
-		var currentBullet:Bullet = cast bulletC.userData;
-		currentBullet.destroy();
+	function collideLaser(chellC:ICollider, projectionsC:ICollider, aCallBack:ICollider->ICollider->Void = null):Bool {
+		var c:Bool = chellC.collide(projectionsC, aCallBack);
+		if (c){
+			GlobalGameData.chell.damage();
+		}
+		return c;
+	}
+
+	function chellVsLaser(chellC:ICollider,laserC:ICollider){
+		GlobalGameData.chell.damage();
+	}
+
+	function laserOnWall(wallC:ICollider, laserC:ICollider) {
+		var currentLaser:Bullet = cast laserC.userData;
+		currentLaser.destroy();
 	}
 	
 
@@ -70,8 +87,10 @@ class Laser extends Entity {
 	}
 
 	override function destroy() {
+		on = false;
+		laserCollision.clear();
 		super.destroy();
-		display.removeFromParent();
+		//display.removeFromParent();
         collision.removeFromParent();
 	}
 

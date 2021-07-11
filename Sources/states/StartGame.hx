@@ -17,17 +17,17 @@ import states.GameState;
 class StartGame extends State {
 
     override function load(resources:Resources) {
-        var atlas=new JoinAtlas(512,512);
-        atlas.add(new FontLoader("Kenney_Thick",20));
+        var atlas=new JoinAtlas(2048,2048);
+        atlas.add(new ImageLoader("intro"));
         resources.add(atlas);
     }
 
     override function init() {
-        var text=new Text("Kenney_Thick");
-        text.x = Screen.getWidth()*0.5-50;
-        text.y = Screen.getHeight()*0.5;
-        text.text="Press Start";
-        stage.addChild(text);
+        var img:Sprite = new Sprite("intro");
+        img.x=0;
+        img.y=0;
+		img.smooth = false;
+        stage.addChild(img);
     }
     override function update(dt:Float) {
         super.update(dt);

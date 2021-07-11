@@ -19612,12 +19612,13 @@ var gameObjects_ButtonGateway = function(x,y,groupCollision,gatewayP) {
 	states_GlobalGameData.simulationLayer.addChild(this.display);
 	this.collision = new com_collision_platformer_CollisionBox();
 	var tmp = this.display.width();
-	this.collision.width = tmp * 0.25;
+	this.collision.width = tmp * 2;
 	this.collision.height = this.display.height();
 	var tmp = this.display.width();
 	this.display.pivotX = tmp * 0.5;
 	this.display.offsetY = 0;
-	this.display.offsetX = -this.display.width() * 0.39;
+	var tmp = this.display.width();
+	this.display.offsetX = tmp * 0.5;
 	this.display.scaleX = this.display.scaleY = 1;
 	this.collision.x = x;
 	this.collision.y = y;
@@ -19649,7 +19650,7 @@ gameObjects_ButtonGateway.prototype = $extend(com_framework_utils_Entity.prototy
 	}
 	,__class__: gameObjects_ButtonGateway
 });
-var gameObjects_ButtonLaser = function(x,y,groupCollision) {
+var gameObjects_ButtonLaser = function(x,y,groupCollision,laserP) {
 	this.active = false;
 	com_framework_utils_Entity.call(this);
 	this.display = new com_gEngine_display_Sprite("boton1");
@@ -19657,18 +19658,20 @@ var gameObjects_ButtonLaser = function(x,y,groupCollision) {
 	states_GlobalGameData.simulationLayer.addChild(this.display);
 	this.collision = new com_collision_platformer_CollisionBox();
 	var tmp = this.display.width();
-	this.collision.width = tmp * 0.25;
+	this.collision.width = tmp * 2;
 	this.collision.height = this.display.height();
 	var tmp = this.display.width();
 	this.display.pivotX = tmp * 0.5;
 	this.display.offsetY = 0;
-	this.display.offsetX = -this.display.width() * 0.39;
+	var tmp = this.display.width();
+	this.display.offsetX = tmp * 0.50;
 	this.display.scaleX = this.display.scaleY = 1;
 	this.collision.x = x;
 	this.collision.y = y;
 	this.collision.staticObject = true;
 	groupCollision.add(this.collision);
 	this.collision.userData = this;
+	this.laser = laserP;
 };
 $hxClasses["gameObjects.ButtonLaser"] = gameObjects_ButtonLaser;
 gameObjects_ButtonLaser.__name__ = "gameObjects.ButtonLaser";
@@ -19677,6 +19680,7 @@ gameObjects_ButtonLaser.prototype = $extend(com_framework_utils_Entity.prototype
 	display: null
 	,collision: null
 	,active: null
+	,laser: null
 	,update: function(dt) {
 		com_framework_utils_Entity.prototype.update.call(this,dt);
 		this.collision.update(dt);
@@ -19688,7 +19692,6 @@ gameObjects_ButtonLaser.prototype = $extend(com_framework_utils_Entity.prototype
 	}
 	,destroy: function() {
 		com_framework_utils_Entity.prototype.destroy.call(this);
-		this.display.removeFromParent();
 		this.collision.removeFromParent();
 	}
 	,__class__: gameObjects_ButtonLaser
@@ -19697,7 +19700,9 @@ var gameObjects_Chell = function(x,y) {
 	this.life = gameObjects_Chell.maxLife;
 	this.facingDir = new kha_math_FastVector2(1,0);
 	this.maxSpeed = 400;
+	this.getCube = false;
 	this.orangePortal = null;
+	this.bluePortal = null;
 	com_framework_utils_Entity.call(this);
 	this.display = new com_gEngine_display_Sprite("hero");
 	this.display.set_smooth(false);
@@ -19733,6 +19738,7 @@ gameObjects_Chell.prototype = $extend(com_framework_utils_Entity.prototype,{
 	,orangeCollision: null
 	,bluePortal: null
 	,orangePortal: null
+	,getCube: null
 	,maxSpeed: null
 	,facingDir: null
 	,life: null
@@ -19741,9 +19747,8 @@ gameObjects_Chell.prototype = $extend(com_framework_utils_Entity.prototype,{
 		this.shoot();
 		com_framework_utils_Entity.prototype.update.call(this,dt);
 		if(this.life < gameObjects_Chell.maxLife && this.life > 0) {
-			this.life += 1;
+			this.life += 10;
 		}
-		com_collision_platformer_CollisionEngine.overlap(states_GlobalGameData.worldMap.collision,this.projectionCollision,$bind(this,this.portalOnWall));
 		if(this.projectionCollision != null) {
 			this.collidePortal(states_GlobalGameData.worldMap.collision,this.projectionCollision);
 		}
@@ -19756,7 +19761,9 @@ gameObjects_Chell.prototype = $extend(com_framework_utils_Entity.prototype,{
 	}
 	,collidePortal: function(worldC,projectionsC,aCallBack) {
 		var c = worldC.collide(projectionsC,aCallBack);
-		this.portalOnWall(worldC,projectionsC);
+		if(c) {
+			this.portalOnWall(worldC,projectionsC);
+		}
 		return c;
 	}
 	,shoot: function() {
@@ -19787,20 +19794,20 @@ gameObjects_Chell.prototype = $extend(com_framework_utils_Entity.prototype,{
 			var portal = currentProjection.portal;
 			if(portal == states_GlobalGameData.blue) {
 				if(states_GlobalGameData.bluePortal != null) {
-					states_GlobalGameData.bluePortal.destroy();
+					states_GlobalGameData.bluePortal.die();
 				}
 				this.bluePortal = new gameObjects_BluePortal(posX,posY,this.blueCollision,side);
 				states_GlobalGameData.bluePortal = this.bluePortal;
 				this.addChild(this.bluePortal);
 			} else {
 				if(states_GlobalGameData.orangePortal != null) {
-					states_GlobalGameData.orangePortal.destroy();
+					states_GlobalGameData.orangePortal.die();
 				}
 				this.orangePortal = new gameObjects_OrangePortal(posX,posY,this.orangeCollision,side);
 				states_GlobalGameData.orangePortal = this.orangePortal;
 				this.addChild(this.orangePortal);
 			}
-			currentProjection.destroy();
+			currentProjection.die();
 		}
 	}
 	,sidePortal: function(proj) {
@@ -19842,7 +19849,7 @@ gameObjects_Chell.prototype = $extend(com_framework_utils_Entity.prototype,{
 	}
 	,deleteProyection: function(gatewayC,projectionsC) {
 		var currentProjection = projectionsC.userData;
-		currentProjection.destroy();
+		currentProjection.die();
 	}
 	,render: function() {
 		com_framework_utils_Entity.prototype.render.call(this);
@@ -19907,13 +19914,15 @@ var gameObjects_Cube = function(x,y,groupCollision) {
 	states_GlobalGameData.simulationLayer.addChild(this.display);
 	this.collision = new com_collision_platformer_CollisionBox();
 	var tmp = this.display.width();
-	this.collision.width = tmp * 0.5;
+	this.collision.width = tmp * 2;
 	var tmp = this.display.height();
-	this.collision.height = tmp * 0.5;
+	this.collision.height = tmp * 2;
 	var tmp = this.display.width();
 	this.display.pivotX = tmp * 0.5;
-	this.display.offsetY = -this.display.height() * 0.5;
-	this.display.offsetX = -this.display.width() * 0.25;
+	var tmp = this.display.height();
+	this.display.offsetY = tmp * 0.5;
+	var tmp = this.display.width();
+	this.display.offsetX = tmp * 0.5;
 	this.display.scaleX = this.display.scaleY = 1;
 	this.collision.x = x;
 	this.collision.y = y;
@@ -19930,13 +19939,17 @@ gameObjects_Cube.prototype = $extend(com_framework_utils_Entity.prototype,{
 	,active: null
 	,update: function(dt) {
 		com_framework_utils_Entity.prototype.update.call(this,dt);
-		this.collision.update(dt);
+		if(this.collision != null) {
+			this.collision.update(dt);
+		}
 	}
 	,render: function() {
 		com_framework_utils_Entity.prototype.render.call(this);
 		this.display.timeline.playAnimation("idle",false);
-		this.display.x = this.collision.x;
-		this.display.y = this.collision.y;
+		if(this.collision != null) {
+			this.display.x = this.collision.x;
+			this.display.y = this.collision.y;
+		}
 	}
 	,destroy: function() {
 		com_framework_utils_Entity.prototype.destroy.call(this);
@@ -20012,6 +20025,7 @@ gameObjects_Gateway.prototype = $extend(com_framework_utils_Entity.prototype,{
 });
 var gameObjects_Laser = function(x,y,groupCollision) {
 	this.facingDir = new kha_math_FastVector2(0,-1);
+	this.on = true;
 	com_framework_utils_Entity.call(this);
 	this.display = new com_gEngine_display_Sprite("laser");
 	this.display.set_smooth(false);
@@ -20040,19 +20054,34 @@ gameObjects_Laser.prototype = $extend(com_framework_utils_Entity.prototype,{
 	display: null
 	,collision: null
 	,laserCollision: null
+	,on: null
 	,facingDir: null
 	,update: function(dt) {
-		var laserBeam = new gameObjects_LaserBeam(this.collision.x + this.collision.width * 0.5,this.collision.y + this.collision.height * 0.5,this.facingDir,this.laserCollision);
-		this.addChild(laserBeam);
+		if(this.on) {
+			var laserBeam = new gameObjects_LaserBeam(this.collision.x + this.collision.width * 0.5,this.collision.y + this.collision.height * 0.5 + 3,this.facingDir,this.laserCollision);
+			this.addChild(laserBeam);
+			com_collision_platformer_CollisionEngine.overlap(states_GlobalGameData.worldMap.collision,this.laserCollision,$bind(this,this.laserOnWall));
+			this.collideLaser(states_GlobalGameData.chell.collision,this.laserCollision);
+		}
 		com_framework_utils_Entity.prototype.update.call(this,dt);
 	}
 	,shoot: function() {
-		var laserBeam = new gameObjects_LaserBeam(this.collision.x + this.collision.width * 0.5,this.collision.y + this.collision.height * 0.5,this.facingDir,this.laserCollision);
+		var laserBeam = new gameObjects_LaserBeam(this.collision.x + this.collision.width * 0.5,this.collision.y + this.collision.height * 0.5 + 3,this.facingDir,this.laserCollision);
 		this.addChild(laserBeam);
 	}
-	,deleteBullet: function(wallC,bulletC) {
-		var currentBullet = bulletC.userData;
-		currentBullet.destroy();
+	,collideLaser: function(chellC,projectionsC,aCallBack) {
+		var c = chellC.collide(projectionsC,aCallBack);
+		if(c) {
+			states_GlobalGameData.chell.damage();
+		}
+		return c;
+	}
+	,chellVsLaser: function(chellC,laserC) {
+		states_GlobalGameData.chell.damage();
+	}
+	,laserOnWall: function(wallC,laserC) {
+		var currentLaser = laserC.userData;
+		currentLaser.destroy();
 	}
 	,render: function() {
 		com_framework_utils_Entity.prototype.render.call(this);
@@ -20060,17 +20089,18 @@ gameObjects_Laser.prototype = $extend(com_framework_utils_Entity.prototype,{
 		this.display.y = this.collision.y;
 	}
 	,destroy: function() {
+		this.on = false;
+		this.laserCollision.clear();
 		com_framework_utils_Entity.prototype.destroy.call(this);
-		this.display.removeFromParent();
 		this.collision.removeFromParent();
 	}
 	,__class__: gameObjects_Laser
 });
 var gameObjects_LaserBeam = function(x,y,dir,collisionGroup) {
 	this.time = 0;
-	this.speed = 3000;
-	this.height = 50;
-	this.width = 25;
+	this.speed = 300;
+	this.height = 10;
+	this.width = 5;
 	com_framework_utils_Entity.call(this);
 	this.display = new com_gEngine_helpers_RectangleDisplay();
 	this.display.setColor(255,0,0);
@@ -20129,7 +20159,7 @@ gameObjects_OrangePortal.prototype = $extend(gameObjects_Portal.prototype,{
 });
 var gameObjects_Projection = function(x,y,dir,pressedKey,collisionGroup) {
 	this.time = 0;
-	this.speed = 200;
+	this.speed = 400;
 	this.height = 5;
 	this.width = 5;
 	com_framework_utils_Entity.call(this);
@@ -23213,23 +23243,15 @@ js_lib__$ArrayBuffer_ArrayBufferCompat.sliceImpl = function(begin,end) {
 	return resultArray.buffer;
 };
 var kha__$Assets_ImageList = function() {
-	this.names = ["boton1","boton2","cake","cubo","hero","laser","puerta","tiles2","tilesPortal","torreta","torretaooo"];
-	this.torretaoooSize = 7564;
-	this.torretaoooDescription = { name : "torretaooo", original_height : 180, file_sizes : [7564], original_width : 225, files : ["torretaooo.png"], type : "image"};
-	this.torretaoooName = "torretaooo";
-	this.torretaooo = null;
+	this.names = ["boton1","boton2","cake","cubo","hero","intro","laser","puerta","tilesPortal","torreta"];
 	this.torretaSize = 13112;
 	this.torretaDescription = { name : "torreta", original_height : 180, file_sizes : [13112], original_width : 200, files : ["torreta.png"], type : "image"};
 	this.torretaName = "torreta";
 	this.torreta = null;
-	this.tilesPortalSize = 2437;
-	this.tilesPortalDescription = { name : "tilesPortal", original_height : 416, file_sizes : [2437], original_width : 64, files : ["tilesPortal.png"], type : "image"};
+	this.tilesPortalSize = 2767;
+	this.tilesPortalDescription = { name : "tilesPortal", original_height : 416, file_sizes : [2767], original_width : 64, files : ["tilesPortal.png"], type : "image"};
 	this.tilesPortalName = "tilesPortal";
 	this.tilesPortal = null;
-	this.tiles2Size = 2694;
-	this.tiles2Description = { name : "tiles2", original_height : 416, file_sizes : [2694], original_width : 64, files : ["tiles2.png"], type : "image"};
-	this.tiles2Name = "tiles2";
-	this.tiles2 = null;
 	this.puertaSize = 3071;
 	this.puertaDescription = { name : "puerta", original_height : 180, file_sizes : [3071], original_width : 200, files : ["puerta.png"], type : "image"};
 	this.puertaName = "puerta";
@@ -23238,6 +23260,10 @@ var kha__$Assets_ImageList = function() {
 	this.laserDescription = { name : "laser", original_height : 32, file_sizes : [237], original_width : 32, files : ["laser.png"], type : "image"};
 	this.laserName = "laser";
 	this.laser = null;
+	this.introSize = 32622;
+	this.introDescription = { name : "intro", original_height : 690, file_sizes : [32622], original_width : 1300, files : ["intro.png"], type : "image"};
+	this.introName = "intro";
+	this.intro = null;
 	this.heroSize = 16820;
 	this.heroDescription = { name : "hero", original_height : 180, file_sizes : [16820], original_width : 225, files : ["hero.png"], type : "image"};
 	this.heroName = "hero";
@@ -23330,6 +23356,19 @@ kha__$Assets_ImageList.prototype = {
 		this.hero.unload();
 		this.hero = null;
 	}
+	,intro: null
+	,introName: null
+	,introDescription: null
+	,introSize: null
+	,introLoad: function(done,failure) {
+		kha_Assets.loadImage("intro",function(image) {
+			done();
+		},failure,{ fileName : "kha/internal/AssetsBuilder.hx", lineNumber : 136, className : "kha._Assets.ImageList", methodName : "introLoad"});
+	}
+	,introUnload: function() {
+		this.intro.unload();
+		this.intro = null;
+	}
 	,laser: null
 	,laserName: null
 	,laserDescription: null
@@ -23355,19 +23394,6 @@ kha__$Assets_ImageList.prototype = {
 	,puertaUnload: function() {
 		this.puerta.unload();
 		this.puerta = null;
-	}
-	,tiles2: null
-	,tiles2Name: null
-	,tiles2Description: null
-	,tiles2Size: null
-	,tiles2Load: function(done,failure) {
-		kha_Assets.loadImage("tiles2",function(image) {
-			done();
-		},failure,{ fileName : "kha/internal/AssetsBuilder.hx", lineNumber : 136, className : "kha._Assets.ImageList", methodName : "tiles2Load"});
-	}
-	,tiles2Unload: function() {
-		this.tiles2.unload();
-		this.tiles2 = null;
 	}
 	,tilesPortal: null
 	,tilesPortalName: null
@@ -23395,19 +23421,6 @@ kha__$Assets_ImageList.prototype = {
 		this.torreta.unload();
 		this.torreta = null;
 	}
-	,torretaooo: null
-	,torretaoooName: null
-	,torretaoooDescription: null
-	,torretaoooSize: null
-	,torretaoooLoad: function(done,failure) {
-		kha_Assets.loadImage("torretaooo",function(image) {
-			done();
-		},failure,{ fileName : "kha/internal/AssetsBuilder.hx", lineNumber : 136, className : "kha._Assets.ImageList", methodName : "torretaoooLoad"});
-	}
-	,torretaoooUnload: function() {
-		this.torretaooo.unload();
-		this.torretaooo = null;
-	}
 	,names: null
 	,__class__: kha__$Assets_ImageList
 };
@@ -23424,13 +23437,13 @@ kha__$Assets_SoundList.prototype = {
 	,__class__: kha__$Assets_SoundList
 };
 var kha__$Assets_BlobList = function() {
-	this.names = ["boton1_xcf","boton2_xcf","cubo_xcf","laser_xcf","puerta_xcf","room1_tmx","roomFinal_tmx","testRoom_tmx","tilesPortal_tsx","tilesPortal_xcf","torreta_xcf"];
+	this.names = ["boton1_xcf","boton2_xcf","cubo_xcf","intro_xcf","laser_xcf","puerta_xcf","room1_tmx","roomFinal_tmx","testRoom_tmx","tilesPortal_tsx","tilesPortal_xcf","torreta_xcf"];
 	this.torreta_xcfSize = 72947;
 	this.torreta_xcfDescription = { name : "torreta_xcf", file_sizes : [72947], files : ["torreta.xcf"], type : "blob"};
 	this.torreta_xcfName = "torreta_xcf";
 	this.torreta_xcf = null;
-	this.tilesPortal_xcfSize = 14686;
-	this.tilesPortal_xcfDescription = { name : "tilesPortal_xcf", file_sizes : [14686], files : ["tilesPortal.xcf"], type : "blob"};
+	this.tilesPortal_xcfSize = 17776;
+	this.tilesPortal_xcfDescription = { name : "tilesPortal_xcf", file_sizes : [17776], files : ["tilesPortal.xcf"], type : "blob"};
 	this.tilesPortal_xcfName = "tilesPortal_xcf";
 	this.tilesPortal_xcf = null;
 	this.tilesPortal_tsxSize = 235;
@@ -23445,8 +23458,8 @@ var kha__$Assets_BlobList = function() {
 	this.roomFinal_tmxDescription = { name : "roomFinal_tmx", file_sizes : [12937], files : ["roomFinal.tmx"], type : "blob"};
 	this.roomFinal_tmxName = "roomFinal_tmx";
 	this.roomFinal_tmx = null;
-	this.room1_tmxSize = 13760;
-	this.room1_tmxDescription = { name : "room1_tmx", file_sizes : [13760], files : ["room1.tmx"], type : "blob"};
+	this.room1_tmxSize = 20272;
+	this.room1_tmxDescription = { name : "room1_tmx", file_sizes : [20272], files : ["room1.tmx"], type : "blob"};
 	this.room1_tmxName = "room1_tmx";
 	this.room1_tmx = null;
 	this.puerta_xcfSize = 64324;
@@ -23457,6 +23470,10 @@ var kha__$Assets_BlobList = function() {
 	this.laser_xcfDescription = { name : "laser_xcf", file_sizes : [2721], files : ["laser.xcf"], type : "blob"};
 	this.laser_xcfName = "laser_xcf";
 	this.laser_xcf = null;
+	this.intro_xcfSize = 81515;
+	this.intro_xcfDescription = { name : "intro_xcf", file_sizes : [81515], files : ["intro.xcf"], type : "blob"};
+	this.intro_xcfName = "intro_xcf";
+	this.intro_xcf = null;
 	this.cubo_xcfSize = 4585;
 	this.cubo_xcfDescription = { name : "cubo_xcf", file_sizes : [4585], files : ["cubo.xcf"], type : "blob"};
 	this.cubo_xcfName = "cubo_xcf";
@@ -23514,6 +23531,19 @@ kha__$Assets_BlobList.prototype = {
 	,cubo_xcfUnload: function() {
 		this.cubo_xcf.unload();
 		this.cubo_xcf = null;
+	}
+	,intro_xcf: null
+	,intro_xcfName: null
+	,intro_xcfDescription: null
+	,intro_xcfSize: null
+	,intro_xcfLoad: function(done,failure) {
+		kha_Assets.loadBlob("intro_xcf",function(blob) {
+			done();
+		},failure,{ fileName : "kha/internal/AssetsBuilder.hx", lineNumber : 144, className : "kha._Assets.BlobList", methodName : "intro_xcfLoad"});
+	}
+	,intro_xcfUnload: function() {
+		this.intro_xcf.unload();
+		this.intro_xcf = null;
 	}
 	,laser_xcf: null
 	,laser_xcfName: null
@@ -23623,15 +23653,11 @@ kha__$Assets_BlobList.prototype = {
 	,__class__: kha__$Assets_BlobList
 };
 var kha__$Assets_FontList = function() {
-	this.names = ["Kenney_Thick","Oh_No","mainfont"];
+	this.names = ["Kenney_Thick","mainfont"];
 	this.mainfontSize = 91504;
 	this.mainfontDescription = { name : "mainfont", file_sizes : [91504], files : ["mainfont.ttf"], type : "font"};
 	this.mainfontName = "mainfont";
 	this.mainfont = null;
-	this.Oh_NoSize = 888980;
-	this.Oh_NoDescription = { name : "Oh_No", file_sizes : [888980], files : ["Oh No.ttf"], type : "font"};
-	this.Oh_NoName = "Oh_No";
-	this.Oh_No = null;
 	this.Kenney_ThickSize = 9448;
 	this.Kenney_ThickDescription = { name : "Kenney_Thick", file_sizes : [9448], files : ["Kenney Thick.ttf"], type : "font"};
 	this.Kenney_ThickName = "Kenney_Thick";
@@ -23655,19 +23681,6 @@ kha__$Assets_FontList.prototype = {
 	,Kenney_ThickUnload: function() {
 		this.Kenney_Thick.unload();
 		this.Kenney_Thick = null;
-	}
-	,Oh_No: null
-	,Oh_NoName: null
-	,Oh_NoDescription: null
-	,Oh_NoSize: null
-	,Oh_NoLoad: function(done,failure) {
-		kha_Assets.loadFont("Oh_No",function(font) {
-			done();
-		},failure,{ fileName : "kha/internal/AssetsBuilder.hx", lineNumber : 148, className : "kha._Assets.FontList", methodName : "Oh_NoLoad"});
-	}
-	,Oh_NoUnload: function() {
-		this.Oh_No.unload();
-		this.Oh_No = null;
 	}
 	,mainfont: null
 	,mainfontName: null
@@ -53559,6 +53572,9 @@ states_EndGame.prototype = $extend(com_framework_utils_State.prototype,{
 			this.cake.visible = false;
 			this.text.set_text("The Cake is a Lie");
 		}
+		if(com_framework_utils_Input.i.isKeyCodePressed(states_GlobalGameData.action) && !this.cake.visible) {
+			this.changeState(new states_StartGame());
+		}
 	}
 	,draw: function(framebuffer) {
 		com_framework_utils_State.prototype.draw.call(this,framebuffer);
@@ -53595,6 +53611,8 @@ states_GameState.prototype = $extend(com_framework_utils_State.prototype,{
 	,touchJoystick: null
 	,room: null
 	,winZone: null
+	,zone2: null
+	,back: null
 	,turretCollision: null
 	,gatewayCollision: null
 	,buttonGatewayCollision: null
@@ -53665,6 +53683,19 @@ states_GameState.prototype = $extend(com_framework_utils_State.prototype,{
 			this.winZone.y = object.y;
 			this.winZone.width = object.width;
 			this.winZone.height = object.height;
+		} else if(object.name.toLowerCase() == "zone2".toLowerCase()) {
+			this.zone2 = new com_collision_platformer_CollisionBox();
+			this.zone2.x = object.x;
+			this.zone2.y = object.y;
+			this.zone2.width = object.width;
+			this.zone2.height = object.height;
+		} else if(object.name.toLowerCase() == "back".toLowerCase()) {
+			this.back = new com_collision_platformer_CollisionBox();
+			this.back.x = object.x;
+			this.back.y = object.y;
+			this.back.width = object.width;
+			this.back.height = object.height;
+			this.back.staticObject = false;
 		} else if(object.name.toLowerCase() == "enemyZone".toLowerCase()) {
 			this.turret = new gameObjects_Turret(object.x,object.y,this.turretCollision);
 			this.addChild(this.turret);
@@ -53678,15 +53709,15 @@ states_GameState.prototype = $extend(com_framework_utils_State.prototype,{
 			this.addChild(this.buttonGateway);
 		}
 		if(object.name.toLowerCase() == "boton1".toLowerCase()) {
-			this.buttonLaser = new gameObjects_ButtonLaser(object.x,object.y - object.height + 1,this.buttonLaserCollision);
+			this.buttonLaser = new gameObjects_ButtonLaser(object.x,object.y - object.height + 1,this.buttonLaserCollision,this.laser);
 			this.addChild(this.buttonLaser);
 		}
 		if(object.name.toLowerCase() == "laser".toLowerCase()) {
-			this.laser = new gameObjects_Laser(object.x,object.y - object.height + 1,this.laserCollision);
+			this.laser = new gameObjects_Laser(object.x,object.y - object.height * 0.5,this.laserCollision);
 			this.addChild(this.laser);
 		}
 		if(object.name.toLowerCase() == "cubo".toLowerCase()) {
-			this.cube = new gameObjects_Cube(object.x,object.y - object.height + 1,this.cubeCollision);
+			this.cube = new gameObjects_Cube(object.x,object.y - 2 * object.height,this.cubeCollision);
 			this.addChild(this.cube);
 		}
 	}
@@ -53711,17 +53742,55 @@ states_GameState.prototype = $extend(com_framework_utils_State.prototype,{
 				this.changeState(new states_GameState(nuevaRoom,this.room));
 			}
 		}
+		if(com_collision_platformer_CollisionEngine.overlap(this.chell.collision,this.zone2)) {
+			this.stage.cameras[0].setTarget(this.zone2.x + kha_System.windowWidth() * 0.5,this.zone2.y);
+			com_collision_platformer_CollisionEngine.collide(this.chell.collision,this.back);
+			this.back.staticObject = true;
+		}
 		com_collision_platformer_CollisionEngine.overlap(this.chell.collision,this.turretCollision,$bind(this,this.chellVsTurret));
 		com_collision_platformer_CollisionEngine.overlap(this.chell.collision,this.buttonGatewayCollision,$bind(this,this.chellVsButtonGateway));
+		com_collision_platformer_CollisionEngine.overlap(this.chell.collision,this.buttonLaserCollision,$bind(this,this.chellVsButtonLaser));
+		com_collision_platformer_CollisionEngine.overlap(this.chell.collision,this.cubeCollision,$bind(this,this.chellVsCube));
 	}
 	,chellVsTurret: function(chellC,turretC) {
 		var currentTurret = turretC.userData;
 		currentTurret.damage();
 	}
 	,chellVsButtonGateway: function(chellC,buttonC) {
+		if(com_framework_utils_Input.i.isKeyCodePressed(states_GlobalGameData.action) && states_GlobalGameData.chell.getCube) {
+			var currentButton = buttonC.userData;
+			var posX = currentButton.collision.x;
+			var posY = currentButton.collision.y;
+			var displayCube = new com_gEngine_display_Sprite("cubo");
+			displayCube.set_smooth(false);
+			displayCube.x = posX + 20;
+			displayCube.y = posY - 15;
+			displayCube.timeline.playAnimation("falling",false);
+			displayCube.scaleX = displayCube.scaleY = 1;
+			states_GlobalGameData.simulationLayer.addChild(displayCube);
+			states_GlobalGameData.chell.getCube = false;
+			currentButton.gateway.openGateway();
+			currentButton.destroy();
+		}
+	}
+	,cubeVsButtonGateway: function(chellC,buttonC) {
 		var currentButton = buttonC.userData;
 		currentButton.gateway.openGateway();
 		currentButton.destroy();
+	}
+	,chellVsButtonLaser: function(chellC,buttonC) {
+		if(com_framework_utils_Input.i.isKeyCodePressed(states_GlobalGameData.action)) {
+			var currentButton = buttonC.userData;
+			currentButton.laser.destroy();
+			currentButton.destroy();
+		}
+	}
+	,chellVsCube: function(chellC,cubeC) {
+		if(com_framework_utils_Input.i.isKeyCodePressed(states_GlobalGameData.action)) {
+			var currentCube = cubeC.userData;
+			states_GlobalGameData.chell.getCube = true;
+			currentCube.destroy();
+		}
 	}
 	,draw: function(framebuffer) {
 		com_framework_utils_State.prototype.draw.call(this,framebuffer);
@@ -53771,16 +53840,16 @@ states_StartGame.__name__ = "states.StartGame";
 states_StartGame.__super__ = com_framework_utils_State;
 states_StartGame.prototype = $extend(com_framework_utils_State.prototype,{
 	load: function(resources) {
-		var atlas = new com_loading_basicResources_JoinAtlas(512,512);
-		atlas.add(new com_loading_basicResources_FontLoader("Kenney_Thick",20));
+		var atlas = new com_loading_basicResources_JoinAtlas(2048,2048);
+		atlas.add(new com_loading_basicResources_ImageLoader("intro"));
 		resources.add(atlas);
 	}
 	,init: function() {
-		var text = new com_gEngine_display_Text("Kenney_Thick");
-		text.x = kha_System.windowWidth() * 0.5 - 50;
-		text.y = kha_System.windowHeight() * 0.5;
-		text.set_text("Press Start");
-		this.stage.addChild(text);
+		var img = new com_gEngine_display_Sprite("intro");
+		img.x = 0;
+		img.y = 0;
+		img.set_smooth(false);
+		this.stage.addChild(img);
 	}
 	,update: function(dt) {
 		com_framework_utils_State.prototype.update.call(this,dt);
@@ -54213,6 +54282,7 @@ kha_netsync_SyncBuilder.objects = [];
 states_GlobalGameData.roomFinal = "1";
 states_GlobalGameData.blue = 88;
 states_GlobalGameData.orange = 90;
+states_GlobalGameData.action = 65;
 Main.main();
 })(typeof exports != "undefined" ? exports : typeof window != "undefined" ? window : typeof self != "undefined" ? self : this, typeof window != "undefined" ? window : typeof global != "undefined" ? global : typeof self != "undefined" ? self : this);
 

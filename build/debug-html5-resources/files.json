@@ -57,16 +57,6 @@
 			"type": "font"
 		},
 		{
-			"name": "Oh_No",
-			"files": [
-				"Oh No.ttf"
-			],
-			"file_sizes": [
-				888980
-			],
-			"type": "font"
-		},
-		{
 			"name": "ShBrightness_frag",
 			"files": [
 				"ShBrightness.frag.essl",
@@ -539,6 +529,28 @@
 			"type": "image",
 			"original_width": 225,
 			"original_height": 180
+		},
+		{
+			"name": "intro",
+			"files": [
+				"intro.png"
+			],
+			"file_sizes": [
+				32622
+			],
+			"type": "image",
+			"original_width": 1300,
+			"original_height": 690
+		},
+		{
+			"name": "intro_xcf",
+			"files": [
+				"intro.xcf"
+			],
+			"file_sizes": [
+				81515
+			],
+			"type": "blob"
 		},
 		{
 			"name": "laser",
@@ -1511,7 +1523,7 @@
 				"room1.tmx"
 			],
 			"file_sizes": [
-				13760
+				20272
 			],
 			"type": "blob"
 		},
@@ -2194,24 +2206,12 @@
 			"type": "blob"
 		},
 		{
-			"name": "tiles2",
-			"files": [
-				"tiles2.png"
-			],
-			"file_sizes": [
-				2694
-			],
-			"type": "image",
-			"original_width": 64,
-			"original_height": 416
-		},
-		{
 			"name": "tilesPortal",
 			"files": [
 				"tilesPortal.png"
 			],
 			"file_sizes": [
-				2437
+				2767
 			],
 			"type": "image",
 			"original_width": 64,
@@ -2233,7 +2233,7 @@
 				"tilesPortal.xcf"
 			],
 			"file_sizes": [
-				14686
+				17776
 			],
 			"type": "blob"
 		},
@@ -2258,18 +2258,6 @@
 				72947
 			],
 			"type": "blob"
-		},
-		{
-			"name": "torretaooo",
-			"files": [
-				"torretaooo.png"
-			],
-			"file_sizes": [
-				7564
-			],
-			"type": "image",
-			"original_width": 225,
-			"original_height": 180
 		},
 		{
 			"name": "vBlurVertexShader_vert",

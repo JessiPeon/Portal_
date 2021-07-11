@@ -28,11 +28,11 @@ class ButtonGateway extends Entity {
 		display.smooth = false;
 		GlobalGameData.simulationLayer.addChild(display);
 		collision = new CollisionBox();
-		collision.width = display.width()*0.25;
+		collision.width = display.width()*2;
 		collision.height = display.height();
 		display.pivotX=display.width()*0.5;
 		display.offsetY = 0;
-		display.offsetX = -display.width()*0.39;
+		display.offsetX = display.width()*0.5;
 
         display.scaleX = display.scaleY = 1;
 		collision.x=x;

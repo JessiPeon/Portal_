@@ -1,5 +1,6 @@
 package states;
 
+import kha.FastFloat;
 import com.loading.basicResources.ImageLoader;
 import gameObjects.Gateway;
 import gameObjects.OrangePortal;
@@ -56,6 +57,8 @@ class GameState extends State {
 	//var mayonnaiseMap:TileMapDisplay;
 	var room:String;
 	var winZone:CollisionBox;
+	var zone2:CollisionBox;
+	var back:CollisionBox;
 	var turretCollision:CollisionGroup= new CollisionGroup();
 	var gatewayCollision:CollisionGroup= new CollisionGroup();
 	var buttonGatewayCollision:CollisionGroup= new CollisionGroup();
@@ -180,6 +183,23 @@ class GameState extends State {
 			winZone.width=object.width;
 			winZone.height=object.height;
 		}else
+		if(compareName(object,"zone2"))
+		{
+			zone2=new CollisionBox();
+			zone2.x=object.x;
+			zone2.y=object.y;
+			zone2.width=object.width;
+			zone2.height=object.height;
+		}else
+		if(compareName(object,"back"))
+		{
+			back=new CollisionBox();
+			back.x=object.x;
+			back.y=object.y;
+			back.width=object.width;
+			back.height=object.height;
+			back.staticObject=false;
+		}else
 		if(compareName(object,"enemyZone")){
 			turret = new Turret(object.x, object.y,turretCollision);
 			addChild(turret);
@@ -193,15 +213,15 @@ class GameState extends State {
 			addChild(buttonGateway);
 		}
 		if(compareName(object,"boton1")){
-			buttonLaser = new ButtonLaser(object.x, object.y-object.height+1,buttonLaserCollision);
+			buttonLaser = new ButtonLaser(object.x, object.y-object.height+1,buttonLaserCollision,laser);
 			addChild(buttonLaser);
 		}
 		if(compareName(object,"laser")){
-			laser = new Laser(object.x, object.y-object.height+1,laserCollision);
+			laser = new Laser(object.x, object.y-object.height*0.5,laserCollision);
 			addChild(laser);
 		}
 		if(compareName(object,"cubo")){
-			cube = new Cube(object.x, object.y-object.height+1,cubeCollision);
+			cube = new Cube(object.x, object.y-2*object.height,cubeCollision);
 			addChild(cube);
 		}
 	}
@@ -233,11 +253,17 @@ class GameState extends State {
 				changeState(new GameState(nuevaRoom,room));
 			}
 		}
+		if(CollisionEngine.overlap(chell.collision,zone2)){
+			//stage.defaultCamera().setTarget(chell.collision.x, chell.collision.y);
+			stage.defaultCamera().setTarget(zone2.x+Screen.getWidth()*0.5, zone2.y);
+			CollisionEngine.collide(chell.collision,back);
+			back.staticObject=true;
+		}
 		
 		CollisionEngine.overlap(chell.collision,turretCollision,chellVsTurret);
 		CollisionEngine.overlap(chell.collision,buttonGatewayCollision,chellVsButtonGateway);
-		
-
+		CollisionEngine.overlap(chell.collision,buttonLaserCollision,chellVsButtonLaser);
+		CollisionEngine.overlap(chell.collision,cubeCollision,chellVsCube);
 		
 
 		//tray.setContactPosition(chell.collision.x + chell.collision.width / 2, chell.collision.y + chell.collision.height + 1, Sides.BOTTOM);
@@ -250,19 +276,41 @@ class GameState extends State {
 		currentTurret.damage();
 	}
 	inline function chellVsButtonGateway(chellC:ICollider,buttonC:ICollider){
+		if (Input.i.isKeyCodePressed(GlobalGameData.action) && GlobalGameData.chell.getCube){
 		var currentButton:ButtonGateway = cast buttonC.userData;
-		/*if (currentButton.gateway.open){
-			currentButton.gateway.close();
-		} else {*/
-			//currentButton.gateway.open = true;
-			//currentButton.gateway.display.timeline.playAnimation("open",false);
-			currentButton.gateway.openGateway();
-		//}
+		var posX:FastFloat = currentButton.collision.x;
+		var posY:FastFloat = currentButton.collision.y;
+		var displayCube:Sprite = new Sprite("cubo");
+		displayCube.smooth = false;
+		displayCube.x=posX+20;
+		displayCube.y=posY-15;
+		displayCube.timeline.playAnimation("falling",false);
+		displayCube.scaleX = displayCube.scaleY = 1;
+		GlobalGameData.simulationLayer.addChild(displayCube);
+		GlobalGameData.chell.getCube = false;
+		currentButton.gateway.openGateway();
 		currentButton.destroy();
-		
-
+		}
 	}
-	
+	inline function cubeVsButtonGateway(chellC:ICollider,buttonC:ICollider){
+		var currentButton:ButtonGateway = cast buttonC.userData;
+		currentButton.gateway.openGateway();
+		currentButton.destroy();
+	}
+	inline function chellVsButtonLaser(chellC:ICollider,buttonC:ICollider){
+		if (Input.i.isKeyCodePressed(GlobalGameData.action)){
+			var currentButton:ButtonLaser = cast buttonC.userData;
+			currentButton.laser.destroy();
+			currentButton.destroy();
+		}
+	}
+	inline function chellVsCube(chellC:ICollider,cubeC:ICollider){
+		if (Input.i.isKeyCodePressed(GlobalGameData.action)){
+			var currentCube:Cube = cast cubeC.userData;
+			GlobalGameData.chell.getCube = true;
+			currentCube.destroy();
+		}
+	}
 
 	#if DEBUGDRAW
 	override function draw(framebuffer:kha.Canvas) {

@@ -16,7 +16,7 @@ class Projection extends Entity {
 	public var portal:KeyCode;
 	var width:Int = 5;
 	var height:Int = 5;
-	var speed:Float = 200;
+	var speed:Float = 400;
 	var time:Float = 0;
 
 	public function new(x:Float, y:Float, dir:FastVector2,pressedKey:KeyCode,collisionGroup:CollisionGroup) {

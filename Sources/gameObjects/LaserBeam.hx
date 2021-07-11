@@ -12,9 +12,9 @@ import com.gEngine.display.Sprite;
 class LaserBeam extends Entity {
 	var display:RectangleDisplay;
 	var collision:CollisionBox;
-	var width:Int = 25;
-	var height:Int = 50;
-	var speed:Float = 3000;
+	var width:Int = 5;
+	var height:Int = 10;
+	var speed:Float = 300;
 	var time:Float = 0;
 
 	public function new(x:Float, y:Float, dir:FastVector2,collisionGroup:CollisionGroup) {

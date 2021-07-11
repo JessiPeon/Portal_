@@ -27,11 +27,11 @@ class Cube extends Entity {
 		display.smooth = false;
 		GlobalGameData.simulationLayer.addChild(display);
 		collision = new CollisionBox();
-		collision.width = display.width()*0.5;
-		collision.height = display.height()*0.5;
+		collision.width = display.width()*2;
+		collision.height = display.height()*2;
 		display.pivotX=display.width()*0.5;
-		display.offsetY = -display.height()*0.5;
-		display.offsetX = -display.width()*0.25;
+		display.offsetY = display.height()*0.5;
+		display.offsetX = display.width()*0.5;
 
         display.scaleX = display.scaleY = 1;
 		collision.x=x;
@@ -41,18 +41,35 @@ class Cube extends Entity {
 		collision.userData = this;
 		
     }
+/*
+	public function new(x:Float,y:Float) {
+        super();
+		display = new Sprite("cubo");
+		display.smooth = false;
+		display.x=x;
+		display.y=y;
+		GlobalGameData.simulationLayer.addChild(display);
 
+        display.scaleX = display.scaleY = 1;
+		
+    }
+*/
 	override function update(dt:Float) {
 		
 		super.update(dt);
-		collision.update(dt);
+		if (collision !=null){
+			collision.update(dt);
+		}
+		
 	}
 
 	override function render() {
 		super.render();
 		display.timeline.playAnimation("idle",false);
-		display.x = collision.x;
-		display.y = collision.y;
+		if (collision !=null){
+			display.x = collision.x;
+			display.y = collision.y;
+		}
 	}
 
 	override function destroy() {

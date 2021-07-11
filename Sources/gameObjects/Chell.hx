@@ -20,8 +20,9 @@ class Chell extends Entity {
 	public var projectionCollision:CollisionGroup;
 	public var blueCollision:CollisionGroup;
 	public var orangeCollision:CollisionGroup;
-	public var bluePortal:BluePortal;
-	 var orangePortal:OrangePortal = null;
+	public var bluePortal:BluePortal = null;
+	public var orangePortal:OrangePortal = null;
+	public var getCube:Bool = false;
 	var maxSpeed = 400;
 	var facingDir:FastVector2 = new FastVector2(1,0);
 	static var maxLife = 10000;
@@ -62,9 +63,9 @@ class Chell extends Entity {
 		shoot();
 		super.update(dt);
 		if (life < maxLife && life > 0){
-			life += 1;
+			life += 10;
 		}
-		CollisionEngine.overlap(GlobalGameData.worldMap.collision,projectionCollision,portalOnWall);
+		//CollisionEngine.overlap(GlobalGameData.worldMap.collision,projectionCollision,portalOnWall);
 		if (projectionCollision != null){
 			collidePortal(GlobalGameData.worldMap.collision,projectionCollision);
 		}
@@ -82,7 +83,9 @@ class Chell extends Entity {
 	}
 	function collidePortal(worldC:ICollider, projectionsC:ICollider, aCallBack:ICollider->ICollider->Void = null):Bool {
 		var c:Bool = worldC.collide(projectionsC, aCallBack);
-		portalOnWall(worldC,projectionsC);
+		if (c){
+			portalOnWall(worldC,projectionsC);
+		}
 		return c;
 	}
 
@@ -99,7 +102,6 @@ class Chell extends Entity {
 	}
 
 	function portalOnWall(worldC:ICollider,projectionsC:ICollider){
-		//var currentTile:CollisionTileMap = cast GlobalGameData.worldMap.collision.userData;
 		var currentProjection:Projection = cast projectionsC.userData;
 		if (currentProjection != null){
 		var side:Int = 99;
@@ -123,14 +125,14 @@ class Chell extends Entity {
 		var portal:KeyCode = currentProjection.portal;
 		if (portal == GlobalGameData.blue){
 			if (GlobalGameData.bluePortal != null){
-				GlobalGameData.bluePortal.destroy();
+				GlobalGameData.bluePortal.die();
 			}
 			bluePortal = new BluePortal(posX, posY,blueCollision,side);
 			GlobalGameData.bluePortal = bluePortal;
 			addChild(bluePortal);
 		} else {
 			if (GlobalGameData.orangePortal != null){
-				GlobalGameData.orangePortal.destroy();
+				GlobalGameData.orangePortal.die();
 			}
 			orangePortal = new OrangePortal(posX, posY,orangeCollision,side);
 			GlobalGameData.orangePortal = orangePortal;
@@ -138,7 +140,7 @@ class Chell extends Entity {
 		}
 		
 
-		currentProjection.destroy();
+		currentProjection.die();
 		}
 	}
 
@@ -191,7 +193,7 @@ class Chell extends Entity {
 
 	function deleteProyection(gatewayC:ICollider,projectionsC:ICollider){
 		var currentProjection:Projection = cast projectionsC.userData;
-		currentProjection.destroy();
+		currentProjection.die();
 	}
 
 	override function render() {

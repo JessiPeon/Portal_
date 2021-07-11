@@ -19,19 +19,19 @@ class ButtonLaser extends Entity {
     public var display:Sprite;
 	public var collision:CollisionBox;
 	public var active:Bool = false;
+	public var laser:Laser;
 
-
-    public function new(x:Float,y:Float,groupCollision:CollisionGroup) {
+    public function new(x:Float,y:Float,groupCollision:CollisionGroup,laserP:Laser) {
         super();
 		display = new Sprite("boton1");
 		display.smooth = false;
 		GlobalGameData.simulationLayer.addChild(display);
 		collision = new CollisionBox();
-		collision.width = display.width()*0.25;
+		collision.width = display.width()*2;
 		collision.height = display.height();
 		display.pivotX=display.width()*0.5;
 		display.offsetY = 0;
-		display.offsetX = -display.width()*0.39;
+		display.offsetX = display.width()*0.50;
 
         display.scaleX = display.scaleY = 1;
 		collision.x=x;
@@ -39,7 +39,7 @@ class ButtonLaser extends Entity {
         collision.staticObject=true;
 		groupCollision.add(collision);
 		collision.userData = this;
-		
+		laser = laserP;
     }
 
 	override function update(dt:Float) {
@@ -55,7 +55,7 @@ class ButtonLaser extends Entity {
 
 	override function destroy() {
 		super.destroy();
-		display.removeFromParent();
+		//display.removeFromParent();
         collision.removeFromParent();
 	}
 

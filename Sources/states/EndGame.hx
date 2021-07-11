@@ -142,7 +142,9 @@ class EndGame extends State {
 			cake.visible = false;
 			text.text="The Cake is a Lie";
 		}
-
+		if(Input.i.isKeyCodePressed(GlobalGameData.action) && !cake.visible){
+			this.changeState(new StartGame());
+		 }
 		
 	}
 
