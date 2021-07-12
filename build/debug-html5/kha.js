@@ -19699,23 +19699,26 @@ gameObjects_ButtonLaser.prototype = $extend(com_framework_utils_Entity.prototype
 });
 var gameObjects_Chell = function(x,y) {
 	this.life = gameObjects_Chell.maxLife;
+	this.facingDirProy = new kha_math_FastVector2(1,0);
 	this.facingDir = new kha_math_FastVector2(1,0);
-	this.maxSpeed = 400;
+	this.maxSpeed = 300;
 	this.getCube = false;
 	this.orangePortal = null;
 	this.bluePortal = null;
 	com_framework_utils_Entity.call(this);
-	this.display = new com_gEngine_display_Sprite("hero");
+	this.display = new com_gEngine_display_Sprite("chell");
 	this.display.set_smooth(false);
 	states_GlobalGameData.simulationLayer.addChild(this.display);
 	this.collision = new com_collision_platformer_CollisionBox();
-	this.collision.width = this.display.width();
+	var tmp = this.display.width();
+	this.collision.width = tmp * 0.5;
 	var tmp = this.display.height();
-	this.collision.height = tmp * 0.5;
+	this.collision.height = tmp * 0.75;
 	var tmp = this.display.width();
 	this.display.pivotX = tmp * 0.5;
-	this.display.offsetY = -this.display.height() * 0.5;
-	this.display.scaleX = -1;
+	this.display.offsetX = -this.display.width() * 0.1;
+	this.display.offsetY = -this.display.height() * 0.25;
+	this.display.scaleX = 1;
 	this.display.scaleY = 1;
 	this.collision.x = x;
 	this.collision.y = y;
@@ -19723,7 +19726,7 @@ var gameObjects_Chell = function(x,y) {
 	this.collision.accelerationY = 2000;
 	this.collision.maxVelocityX = 500;
 	this.collision.maxVelocityY = 800;
-	this.collision.dragX = 0.9;
+	this.collision.dragX = 0.3;
 	this.projectionCollision = new com_collision_platformer_CollisionGroup();
 	this.blueCollision = new com_collision_platformer_CollisionGroup();
 	this.orangeCollision = new com_collision_platformer_CollisionGroup();
@@ -19742,6 +19745,7 @@ gameObjects_Chell.prototype = $extend(com_framework_utils_Entity.prototype,{
 	,getCube: null
 	,maxSpeed: null
 	,facingDir: null
+	,facingDirProy: null
 	,life: null
 	,lastAccelerationX: null
 	,lastAccelerationY: null
@@ -19773,18 +19777,507 @@ gameObjects_Chell.prototype = $extend(com_framework_utils_Entity.prototype,{
 		return c;
 	}
 	,shoot: function() {
-		if(com_framework_utils_Input.i.isKeyCodePressed(states_GlobalGameData.blue)) {
-			var projection = new gameObjects_Projection(this.collision.x + this.collision.width * 0.5,this.collision.y + this.collision.height * 0.5,this.facingDir,states_GlobalGameData.blue,this.projectionCollision);
-			this.addChild(projection);
+		var _this = states_GlobalGameData.camera;
+		var _this1 = com_framework_utils_Input.i;
+		var targetX = _this1.mousePosition.x * _this1.screenScale.x;
+		var _this1 = com_framework_utils_Input.i;
+		var targetY = _this1.mousePosition.y * _this1.screenScale.y;
+		var homogeneousTargetX = targetX / _this.width * 2 - 1;
+		var homogeneousTargetY = kha_Image.renderTargetsInvertedY() ? targetY / _this.height * 2 - 1 : 1 - targetY / _this.height * 2;
+		var transform__00 = 1;
+		var transform__10 = 0;
+		var transform__20 = 0;
+		var transform__30 = 0;
+		var transform__01 = 0;
+		var transform__11 = 1;
+		var transform__21 = 0;
+		var transform__31 = 0;
+		var transform__02 = 0;
+		var transform__12 = 0;
+		var transform__22 = 1;
+		var transform__32 = 0;
+		var transform__03 = 0;
+		var transform__13 = 0;
+		var transform__23 = 0;
+		var transform__33 = 1;
+		if(_this.projectionIsOrthogonal) {
+			homogeneousTargetX = targetX - _this.width * 0.5;
+			homogeneousTargetY = targetY - _this.height * 0.5;
+			var _this1 = _this.view;
+			var m3 = _this1._12;
+			var m4 = _this1._22;
+			var m5 = _this1._32;
+			var m6 = _this1._13;
+			var m7 = _this1._23;
+			var m8 = _this1._33;
+			var c00 = _this1._11 * (m4 * m8 - m5 * m7) - _this1._21 * (m3 * m8 - m5 * m6) + _this1._31 * (m3 * m7 - m4 * m6);
+			var m3 = _this1._12;
+			var m4 = _this1._22;
+			var m5 = _this1._32;
+			var m6 = _this1._13;
+			var m7 = _this1._23;
+			var m8 = _this1._33;
+			var c01 = _this1._10 * (m4 * m8 - m5 * m7) - _this1._20 * (m3 * m8 - m5 * m6) + _this1._30 * (m3 * m7 - m4 * m6);
+			var m3 = _this1._11;
+			var m4 = _this1._21;
+			var m5 = _this1._31;
+			var m6 = _this1._13;
+			var m7 = _this1._23;
+			var m8 = _this1._33;
+			var c02 = _this1._10 * (m4 * m8 - m5 * m7) - _this1._20 * (m3 * m8 - m5 * m6) + _this1._30 * (m3 * m7 - m4 * m6);
+			var m3 = _this1._11;
+			var m4 = _this1._21;
+			var m5 = _this1._31;
+			var m6 = _this1._12;
+			var m7 = _this1._22;
+			var m8 = _this1._32;
+			var c03 = _this1._10 * (m4 * m8 - m5 * m7) - _this1._20 * (m3 * m8 - m5 * m6) + _this1._30 * (m3 * m7 - m4 * m6);
+			var det = _this1._00 * c00 - _this1._01 * c01 + _this1._02 * c02 - _this1._03 * c03;
+			if(Math.abs(det) < 0.000001) {
+				throw haxe_Exception.thrown("determinant is too small");
+			}
+			var m3 = _this1._02;
+			var m4 = _this1._22;
+			var m5 = _this1._32;
+			var m6 = _this1._03;
+			var m7 = _this1._23;
+			var m8 = _this1._33;
+			var c10 = _this1._01 * (m4 * m8 - m5 * m7) - _this1._21 * (m3 * m8 - m5 * m6) + _this1._31 * (m3 * m7 - m4 * m6);
+			var m3 = _this1._02;
+			var m4 = _this1._22;
+			var m5 = _this1._32;
+			var m6 = _this1._03;
+			var m7 = _this1._23;
+			var m8 = _this1._33;
+			var c11 = _this1._00 * (m4 * m8 - m5 * m7) - _this1._20 * (m3 * m8 - m5 * m6) + _this1._30 * (m3 * m7 - m4 * m6);
+			var m3 = _this1._01;
+			var m4 = _this1._21;
+			var m5 = _this1._31;
+			var m6 = _this1._03;
+			var m7 = _this1._23;
+			var m8 = _this1._33;
+			var c12 = _this1._00 * (m4 * m8 - m5 * m7) - _this1._20 * (m3 * m8 - m5 * m6) + _this1._30 * (m3 * m7 - m4 * m6);
+			var m3 = _this1._01;
+			var m4 = _this1._21;
+			var m5 = _this1._31;
+			var m6 = _this1._02;
+			var m7 = _this1._22;
+			var m8 = _this1._32;
+			var c13 = _this1._00 * (m4 * m8 - m5 * m7) - _this1._20 * (m3 * m8 - m5 * m6) + _this1._30 * (m3 * m7 - m4 * m6);
+			var m3 = _this1._02;
+			var m4 = _this1._12;
+			var m5 = _this1._32;
+			var m6 = _this1._03;
+			var m7 = _this1._13;
+			var m8 = _this1._33;
+			var c20 = _this1._01 * (m4 * m8 - m5 * m7) - _this1._11 * (m3 * m8 - m5 * m6) + _this1._31 * (m3 * m7 - m4 * m6);
+			var m3 = _this1._02;
+			var m4 = _this1._12;
+			var m5 = _this1._32;
+			var m6 = _this1._03;
+			var m7 = _this1._13;
+			var m8 = _this1._33;
+			var c21 = _this1._00 * (m4 * m8 - m5 * m7) - _this1._10 * (m3 * m8 - m5 * m6) + _this1._30 * (m3 * m7 - m4 * m6);
+			var m3 = _this1._01;
+			var m4 = _this1._11;
+			var m5 = _this1._31;
+			var m6 = _this1._03;
+			var m7 = _this1._13;
+			var m8 = _this1._33;
+			var c22 = _this1._00 * (m4 * m8 - m5 * m7) - _this1._10 * (m3 * m8 - m5 * m6) + _this1._30 * (m3 * m7 - m4 * m6);
+			var m3 = _this1._01;
+			var m4 = _this1._11;
+			var m5 = _this1._31;
+			var m6 = _this1._02;
+			var m7 = _this1._12;
+			var m8 = _this1._32;
+			var c23 = _this1._00 * (m4 * m8 - m5 * m7) - _this1._10 * (m3 * m8 - m5 * m6) + _this1._30 * (m3 * m7 - m4 * m6);
+			var m3 = _this1._02;
+			var m4 = _this1._12;
+			var m5 = _this1._22;
+			var m6 = _this1._03;
+			var m7 = _this1._13;
+			var m8 = _this1._23;
+			var c30 = _this1._01 * (m4 * m8 - m5 * m7) - _this1._11 * (m3 * m8 - m5 * m6) + _this1._21 * (m3 * m7 - m4 * m6);
+			var m3 = _this1._02;
+			var m4 = _this1._12;
+			var m5 = _this1._22;
+			var m6 = _this1._03;
+			var m7 = _this1._13;
+			var m8 = _this1._23;
+			var c31 = _this1._00 * (m4 * m8 - m5 * m7) - _this1._10 * (m3 * m8 - m5 * m6) + _this1._20 * (m3 * m7 - m4 * m6);
+			var m3 = _this1._01;
+			var m4 = _this1._11;
+			var m5 = _this1._21;
+			var m6 = _this1._03;
+			var m7 = _this1._13;
+			var m8 = _this1._23;
+			var c32 = _this1._00 * (m4 * m8 - m5 * m7) - _this1._10 * (m3 * m8 - m5 * m6) + _this1._20 * (m3 * m7 - m4 * m6);
+			var m3 = _this1._01;
+			var m4 = _this1._11;
+			var m5 = _this1._21;
+			var m6 = _this1._02;
+			var m7 = _this1._12;
+			var m8 = _this1._22;
+			var c33 = _this1._00 * (m4 * m8 - m5 * m7) - _this1._10 * (m3 * m8 - m5 * m6) + _this1._20 * (m3 * m7 - m4 * m6);
+			var invdet = 1.0 / det;
+			var m__00 = c00 * invdet;
+			var m__10 = -c01 * invdet;
+			var m__20 = c02 * invdet;
+			var m__30 = -c03 * invdet;
+			var m__01 = -c10 * invdet;
+			var m__11 = c11 * invdet;
+			var m__21 = -c12 * invdet;
+			var m__31 = c13 * invdet;
+			var m__02 = c20 * invdet;
+			var m__12 = -c21 * invdet;
+			var m__22 = c22 * invdet;
+			var m__32 = -c23 * invdet;
+			var m__03 = -c30 * invdet;
+			var m__13 = c31 * invdet;
+			var m__23 = -c32 * invdet;
+			var m__33 = c33 * invdet;
+			transform__00 = m__00;
+			transform__10 = m__10;
+			transform__20 = m__20;
+			transform__30 = m__30;
+			transform__01 = m__01;
+			transform__11 = m__11;
+			transform__21 = m__21;
+			transform__31 = m__31;
+			transform__02 = m__02;
+			transform__12 = m__12;
+			transform__22 = m__22;
+			transform__32 = m__32;
+			transform__03 = m__03;
+			transform__13 = m__13;
+			transform__23 = m__23;
+			transform__33 = m__33;
+		} else {
+			var _this1 = _this.projection;
+			var m = _this.view;
+			var _this__00 = _this1._00 * m._00 + _this1._10 * m._01 + _this1._20 * m._02 + _this1._30 * m._03;
+			var _this__10 = _this1._00 * m._10 + _this1._10 * m._11 + _this1._20 * m._12 + _this1._30 * m._13;
+			var _this__20 = _this1._00 * m._20 + _this1._10 * m._21 + _this1._20 * m._22 + _this1._30 * m._23;
+			var _this__30 = _this1._00 * m._30 + _this1._10 * m._31 + _this1._20 * m._32 + _this1._30 * m._33;
+			var _this__01 = _this1._01 * m._00 + _this1._11 * m._01 + _this1._21 * m._02 + _this1._31 * m._03;
+			var _this__11 = _this1._01 * m._10 + _this1._11 * m._11 + _this1._21 * m._12 + _this1._31 * m._13;
+			var _this__21 = _this1._01 * m._20 + _this1._11 * m._21 + _this1._21 * m._22 + _this1._31 * m._23;
+			var _this__31 = _this1._01 * m._30 + _this1._11 * m._31 + _this1._21 * m._32 + _this1._31 * m._33;
+			var _this__02 = _this1._02 * m._00 + _this1._12 * m._01 + _this1._22 * m._02 + _this1._32 * m._03;
+			var _this__12 = _this1._02 * m._10 + _this1._12 * m._11 + _this1._22 * m._12 + _this1._32 * m._13;
+			var _this__22 = _this1._02 * m._20 + _this1._12 * m._21 + _this1._22 * m._22 + _this1._32 * m._23;
+			var _this__32 = _this1._02 * m._30 + _this1._12 * m._31 + _this1._22 * m._32 + _this1._32 * m._33;
+			var _this__03 = _this1._03 * m._00 + _this1._13 * m._01 + _this1._23 * m._02 + _this1._33 * m._03;
+			var _this__13 = _this1._03 * m._10 + _this1._13 * m._11 + _this1._23 * m._12 + _this1._33 * m._13;
+			var _this__23 = _this1._03 * m._20 + _this1._13 * m._21 + _this1._23 * m._22 + _this1._33 * m._23;
+			var _this__33 = _this1._03 * m._30 + _this1._13 * m._31 + _this1._23 * m._32 + _this1._33 * m._33;
+			var m3 = _this__12;
+			var m4 = _this__22;
+			var m5 = _this__32;
+			var m6 = _this__13;
+			var m7 = _this__23;
+			var m8 = _this__33;
+			var c00 = _this__11 * (m4 * m8 - m5 * m7) - _this__21 * (m3 * m8 - m5 * m6) + _this__31 * (m3 * m7 - m4 * m6);
+			var m3 = _this__12;
+			var m4 = _this__22;
+			var m5 = _this__32;
+			var m6 = _this__13;
+			var m7 = _this__23;
+			var m8 = _this__33;
+			var c01 = _this__10 * (m4 * m8 - m5 * m7) - _this__20 * (m3 * m8 - m5 * m6) + _this__30 * (m3 * m7 - m4 * m6);
+			var m3 = _this__11;
+			var m4 = _this__21;
+			var m5 = _this__31;
+			var m6 = _this__13;
+			var m7 = _this__23;
+			var m8 = _this__33;
+			var c02 = _this__10 * (m4 * m8 - m5 * m7) - _this__20 * (m3 * m8 - m5 * m6) + _this__30 * (m3 * m7 - m4 * m6);
+			var m3 = _this__11;
+			var m4 = _this__21;
+			var m5 = _this__31;
+			var m6 = _this__12;
+			var m7 = _this__22;
+			var m8 = _this__32;
+			var c03 = _this__10 * (m4 * m8 - m5 * m7) - _this__20 * (m3 * m8 - m5 * m6) + _this__30 * (m3 * m7 - m4 * m6);
+			var det = _this__00 * c00 - _this__01 * c01 + _this__02 * c02 - _this__03 * c03;
+			if(Math.abs(det) < 0.000001) {
+				throw haxe_Exception.thrown("determinant is too small");
+			}
+			var m3 = _this__02;
+			var m4 = _this__22;
+			var m5 = _this__32;
+			var m6 = _this__03;
+			var m7 = _this__23;
+			var m8 = _this__33;
+			var c10 = _this__01 * (m4 * m8 - m5 * m7) - _this__21 * (m3 * m8 - m5 * m6) + _this__31 * (m3 * m7 - m4 * m6);
+			var m3 = _this__02;
+			var m4 = _this__22;
+			var m5 = _this__32;
+			var m6 = _this__03;
+			var m7 = _this__23;
+			var m8 = _this__33;
+			var c11 = _this__00 * (m4 * m8 - m5 * m7) - _this__20 * (m3 * m8 - m5 * m6) + _this__30 * (m3 * m7 - m4 * m6);
+			var m3 = _this__01;
+			var m4 = _this__21;
+			var m5 = _this__31;
+			var m6 = _this__03;
+			var m7 = _this__23;
+			var m8 = _this__33;
+			var c12 = _this__00 * (m4 * m8 - m5 * m7) - _this__20 * (m3 * m8 - m5 * m6) + _this__30 * (m3 * m7 - m4 * m6);
+			var m3 = _this__01;
+			var m4 = _this__21;
+			var m5 = _this__31;
+			var m6 = _this__02;
+			var m7 = _this__22;
+			var m8 = _this__32;
+			var c13 = _this__00 * (m4 * m8 - m5 * m7) - _this__20 * (m3 * m8 - m5 * m6) + _this__30 * (m3 * m7 - m4 * m6);
+			var m3 = _this__02;
+			var m4 = _this__12;
+			var m5 = _this__32;
+			var m6 = _this__03;
+			var m7 = _this__13;
+			var m8 = _this__33;
+			var c20 = _this__01 * (m4 * m8 - m5 * m7) - _this__11 * (m3 * m8 - m5 * m6) + _this__31 * (m3 * m7 - m4 * m6);
+			var m3 = _this__02;
+			var m4 = _this__12;
+			var m5 = _this__32;
+			var m6 = _this__03;
+			var m7 = _this__13;
+			var m8 = _this__33;
+			var c21 = _this__00 * (m4 * m8 - m5 * m7) - _this__10 * (m3 * m8 - m5 * m6) + _this__30 * (m3 * m7 - m4 * m6);
+			var m3 = _this__01;
+			var m4 = _this__11;
+			var m5 = _this__31;
+			var m6 = _this__03;
+			var m7 = _this__13;
+			var m8 = _this__33;
+			var c22 = _this__00 * (m4 * m8 - m5 * m7) - _this__10 * (m3 * m8 - m5 * m6) + _this__30 * (m3 * m7 - m4 * m6);
+			var m3 = _this__01;
+			var m4 = _this__11;
+			var m5 = _this__31;
+			var m6 = _this__02;
+			var m7 = _this__12;
+			var m8 = _this__32;
+			var c23 = _this__00 * (m4 * m8 - m5 * m7) - _this__10 * (m3 * m8 - m5 * m6) + _this__30 * (m3 * m7 - m4 * m6);
+			var m3 = _this__02;
+			var m4 = _this__12;
+			var m5 = _this__22;
+			var m6 = _this__03;
+			var m7 = _this__13;
+			var m8 = _this__23;
+			var c30 = _this__01 * (m4 * m8 - m5 * m7) - _this__11 * (m3 * m8 - m5 * m6) + _this__21 * (m3 * m7 - m4 * m6);
+			var m3 = _this__02;
+			var m4 = _this__12;
+			var m5 = _this__22;
+			var m6 = _this__03;
+			var m7 = _this__13;
+			var m8 = _this__23;
+			var c31 = _this__00 * (m4 * m8 - m5 * m7) - _this__10 * (m3 * m8 - m5 * m6) + _this__20 * (m3 * m7 - m4 * m6);
+			var m3 = _this__01;
+			var m4 = _this__11;
+			var m5 = _this__21;
+			var m6 = _this__03;
+			var m7 = _this__13;
+			var m8 = _this__23;
+			var c32 = _this__00 * (m4 * m8 - m5 * m7) - _this__10 * (m3 * m8 - m5 * m6) + _this__20 * (m3 * m7 - m4 * m6);
+			var m3 = _this__01;
+			var m4 = _this__11;
+			var m5 = _this__21;
+			var m6 = _this__02;
+			var m7 = _this__12;
+			var m8 = _this__22;
+			var c33 = _this__00 * (m4 * m8 - m5 * m7) - _this__10 * (m3 * m8 - m5 * m6) + _this__20 * (m3 * m7 - m4 * m6);
+			var invdet = 1.0 / det;
+			var m__00 = c00 * invdet;
+			var m__10 = -c01 * invdet;
+			var m__20 = c02 * invdet;
+			var m__30 = -c03 * invdet;
+			var m__01 = -c10 * invdet;
+			var m__11 = c11 * invdet;
+			var m__21 = -c12 * invdet;
+			var m__31 = c13 * invdet;
+			var m__02 = c20 * invdet;
+			var m__12 = -c21 * invdet;
+			var m__22 = c22 * invdet;
+			var m__32 = -c23 * invdet;
+			var m__03 = -c30 * invdet;
+			var m__13 = c31 * invdet;
+			var m__23 = -c32 * invdet;
+			var m__33 = c33 * invdet;
+			transform__00 = m__00;
+			transform__10 = m__10;
+			transform__20 = m__20;
+			transform__30 = m__30;
+			transform__01 = m__01;
+			transform__11 = m__11;
+			transform__21 = m__21;
+			transform__31 = m__31;
+			transform__02 = m__02;
+			transform__12 = m__12;
+			transform__22 = m__22;
+			transform__32 = m__32;
+			transform__03 = m__03;
+			transform__13 = m__13;
+			transform__23 = m__23;
+			transform__33 = m__33;
 		}
-		if(com_framework_utils_Input.i.isKeyCodePressed(states_GlobalGameData.orange)) {
-			var projection = new gameObjects_Projection(this.collision.x + this.collision.width * 0.5,this.collision.y + this.collision.height * 0.5,this.facingDir,states_GlobalGameData.orange,this.projectionCollision);
-			this.addChild(projection);
+		var x = homogeneousTargetX;
+		var y = homogeneousTargetY;
+		var z = -1;
+		var w = 1;
+		if(w == null) {
+			w = 1;
 		}
+		if(z == null) {
+			z = 0;
+		}
+		if(y == null) {
+			y = 0;
+		}
+		if(x == null) {
+			x = 0;
+		}
+		var value_x = x;
+		var value_y = y;
+		var value_z = z;
+		var value_w = w;
+		var farRaw_x = 0;
+		var farRaw_y = 0;
+		var farRaw_z = 0;
+		var farRaw_w = 1;
+		farRaw_x = transform__00 * value_x + transform__10 * value_y + transform__20 * value_z + transform__30 * value_w;
+		farRaw_y = transform__01 * value_x + transform__11 * value_y + transform__21 * value_z + transform__31 * value_w;
+		farRaw_z = transform__02 * value_x + transform__12 * value_y + transform__22 * value_z + transform__32 * value_w;
+		farRaw_w = transform__03 * value_x + transform__13 * value_y + transform__23 * value_z + transform__33 * value_w;
+		var x = homogeneousTargetX;
+		var y = homogeneousTargetY;
+		var z = 1;
+		var w = 1;
+		if(w == null) {
+			w = 1;
+		}
+		if(z == null) {
+			z = 0;
+		}
+		if(y == null) {
+			y = 0;
+		}
+		if(x == null) {
+			x = 0;
+		}
+		var value_x = x;
+		var value_y = y;
+		var value_z = z;
+		var value_w = w;
+		var nearRaw_x = 0;
+		var nearRaw_y = 0;
+		var nearRaw_z = 0;
+		var nearRaw_w = 1;
+		nearRaw_x = transform__00 * value_x + transform__10 * value_y + transform__20 * value_z + transform__30 * value_w;
+		nearRaw_y = transform__01 * value_x + transform__11 * value_y + transform__21 * value_z + transform__31 * value_w;
+		nearRaw_z = transform__02 * value_x + transform__12 * value_y + transform__22 * value_z + transform__32 * value_w;
+		nearRaw_w = transform__03 * value_x + transform__13 * value_y + transform__23 * value_z + transform__33 * value_w;
+		var value = 1 / farRaw_w;
+		var x = farRaw_x * value;
+		var y = farRaw_y * value;
+		var z = farRaw_z * value;
+		var w = farRaw_w * value;
+		if(w == null) {
+			w = 1;
+		}
+		if(z == null) {
+			z = 0;
+		}
+		if(y == null) {
+			y = 0;
+		}
+		if(x == null) {
+			x = 0;
+		}
+		var far_x = x;
+		var far_y = y;
+		var far_z = z;
+		var far_w = w;
+		var value = 1 / nearRaw_w;
+		var x = nearRaw_x * value;
+		var y = nearRaw_y * value;
+		var z = nearRaw_z * value;
+		var w = nearRaw_w * value;
+		if(w == null) {
+			w = 1;
+		}
+		if(z == null) {
+			z = 0;
+		}
+		if(y == null) {
+			y = 0;
+		}
+		if(x == null) {
+			x = 0;
+		}
+		var near_x = x;
+		var near_y = y;
+		var near_z = z;
+		var near_w = w;
+		var x = far_x - near_x;
+		var y = far_y - near_y;
+		var z = far_z - near_z;
+		var w = far_w - near_w;
+		if(w == null) {
+			w = 1;
+		}
+		if(z == null) {
+			z = 0;
+		}
+		if(y == null) {
+			y = 0;
+		}
+		if(x == null) {
+			x = 0;
+		}
+		var dir_x = x;
+		var dir_y = y;
+		var dir_z = z;
+		var dir_w = w;
+		var x = near_x + dir_x * ((0 - near_z) / dir_z);
+		var y = near_y + dir_y * ((0 - near_z) / dir_z);
+		if(y == null) {
+			y = 0;
+		}
+		if(x == null) {
+			x = 0;
+		}
+		var mousePosition_x = x;
+		var mousePosition_y = y;
+		this.facingDirProy.x = mousePosition_x - this.collision.x;
+		this.facingDirProy.y = mousePosition_y - this.collision.y;
+		var _this = this.facingDirProy;
+		var _this1 = this.facingDirProy;
+		var x = _this1.x;
+		var y = _this1.y;
+		if(y == null) {
+			y = 0;
+		}
+		if(x == null) {
+			x = 0;
+		}
+		var v_x = x;
+		var v_y = y;
+		var currentLength = Math.sqrt(v_x * v_x + v_y * v_y);
+		if(currentLength != 0) {
+			var mul = 1 / currentLength;
+			v_x *= mul;
+			v_y *= mul;
+		}
+		_this.x = v_x;
+		_this.y = v_y;
+		var projection = new gameObjects_Projection(this.collision.x + this.collision.width * 0.5,this.collision.y + this.collision.height * 0.25,this.facingDirProy,this.projectionCollision);
+		this.addChild(projection);
 	}
 	,portalOnWall: function(worldC,projectionsC) {
 		var currentProjection = projectionsC.userData;
-		if(currentProjection != null) {
+		if(com_framework_utils_Input.i.isKeyCodePressed(states_GlobalGameData.orange) || com_framework_utils_Input.i.isKeyCodePressed(states_GlobalGameData.blue)) {
 			var side = 99;
 			if(currentProjection.collision.isTouching(8)) {
 				side = 8;
@@ -19797,8 +20290,7 @@ gameObjects_Chell.prototype = $extend(com_framework_utils_Entity.prototype,{
 			}
 			var posX = currentProjection.collision.lastX;
 			var posY = currentProjection.collision.lastY;
-			var portal = currentProjection.portal;
-			if(portal == states_GlobalGameData.blue) {
+			if(com_framework_utils_Input.i.isKeyCodePressed(states_GlobalGameData.blue)) {
 				if(states_GlobalGameData.bluePortal != null) {
 					states_GlobalGameData.bluePortal.die();
 				}
@@ -19813,8 +20305,8 @@ gameObjects_Chell.prototype = $extend(com_framework_utils_Entity.prototype,{
 				states_GlobalGameData.orangePortal = this.orangePortal;
 				this.addChild(this.orangePortal);
 			}
-			currentProjection.die();
 		}
+		currentProjection.die();
 	}
 	,chellVsOrangePortal: function(chellC,orangePortalC) {
 		var posXFin = states_GlobalGameData.bluePortal.collision.x;
@@ -19879,6 +20371,11 @@ gameObjects_Chell.prototype = $extend(com_framework_utils_Entity.prototype,{
 		}
 		this.display.x = this.collision.x;
 		this.display.y = this.collision.y;
+		if(this.facingDirProy.x < 0) {
+			this.display.scaleX = -Math.abs(this.display.scaleX);
+		} else {
+			this.display.scaleX = Math.abs(this.display.scaleX);
+		}
 	}
 	,getVida: function() {
 		return this.life;
@@ -19887,8 +20384,9 @@ gameObjects_Chell.prototype = $extend(com_framework_utils_Entity.prototype,{
 		if(id == 14) {
 			if(value == 1) {
 				this.collision.accelerationX = -this.maxSpeed;
-				this.display.scaleX = Math.abs(this.display.scaleX);
+				this.display.scaleX = -Math.abs(this.display.scaleX);
 				this.facingDir.x = -1;
+				this.facingDirProy = this.facingDir;
 			} else if(this.collision.accelerationX < 0) {
 				this.collision.accelerationX = 0;
 			}
@@ -19896,8 +20394,9 @@ gameObjects_Chell.prototype = $extend(com_framework_utils_Entity.prototype,{
 		if(id == 15) {
 			if(value == 1) {
 				this.collision.accelerationX = this.maxSpeed;
-				this.display.scaleX = -Math.abs(this.display.scaleX);
+				this.display.scaleX = Math.abs(this.display.scaleX);
 				this.facingDir.x = 1;
+				this.facingDirProy = this.facingDir;
 			} else if(this.collision.accelerationX > 0) {
 				this.collision.accelerationX = 0;
 			}
@@ -20168,18 +20667,17 @@ gameObjects_OrangePortal.__super__ = gameObjects_Portal;
 gameObjects_OrangePortal.prototype = $extend(gameObjects_Portal.prototype,{
 	__class__: gameObjects_OrangePortal
 });
-var gameObjects_Projection = function(x,y,dir,pressedKey,collisionGroup) {
+var gameObjects_Projection = function(x,y,dir,collisionGroup) {
 	this.time = 0;
-	this.speed = 400;
-	this.height = 5;
-	this.width = 5;
+	this.speed = 500;
+	this.height = 4;
+	this.width = 4;
 	com_framework_utils_Entity.call(this);
 	this.display = new com_gEngine_helpers_RectangleDisplay();
 	this.display.setColor(255,255,255);
 	this.display.scaleX = this.width;
 	this.display.scaleY = this.height;
 	states_GlobalGameData.simulationLayer.addChild(this.display);
-	this.portal = pressedKey;
 	this.collision = new com_collision_platformer_CollisionBox();
 	this.collision.width = this.width;
 	this.collision.height = this.height;
@@ -20196,7 +20694,6 @@ gameObjects_Projection.__super__ = com_framework_utils_Entity;
 gameObjects_Projection.prototype = $extend(com_framework_utils_Entity.prototype,{
 	display: null
 	,collision: null
-	,portal: null
 	,width: null
 	,height: null
 	,speed: null
@@ -20207,6 +20704,9 @@ gameObjects_Projection.prototype = $extend(com_framework_utils_Entity.prototype,
 		this.collision.update(dt);
 		if(this.time > 4) {
 			this.die();
+		}
+		if(this.time > 0.15) {
+			this.display.visible = false;
 		}
 	}
 	,render: function() {
@@ -20300,6 +20800,7 @@ gameObjects_Turret.prototype = $extend(com_framework_utils_Entity.prototype,{
 		currentBullet.destroy();
 	}
 	,render: function() {
+		this.display.timeline.frameRate = 0.1;
 		com_framework_utils_Entity.prototype.render.call(this);
 		if(this.collision.isTouching(8) && !this.death) {
 			this.display.timeline.playAnimation("idle");
@@ -20311,6 +20812,9 @@ gameObjects_Turret.prototype = $extend(com_framework_utils_Entity.prototype,{
 	}
 	,damage: function() {
 		this.bulletsCollision.clear();
+		this.display.timeline.playAnimation("falling",false);
+		this.display.timeline.playAnimation("fall",false);
+		this.display.timeline.playAnimation("fall",false);
 		this.display.timeline.playAnimation("fall",false);
 		this.display.timeline.playAnimation("death",false);
 		this.death = true;
@@ -23254,7 +23758,7 @@ js_lib__$ArrayBuffer_ArrayBufferCompat.sliceImpl = function(begin,end) {
 	return resultArray.buffer;
 };
 var kha__$Assets_ImageList = function() {
-	this.names = ["boton1","boton2","cake","cubo","hero","intro","laser","puerta","tilesPortal","torreta"];
+	this.names = ["boton1","boton2","cake","chell","cubo","intro","laser","puerta","tilesPortal","torreta"];
 	this.torretaSize = 13112;
 	this.torretaDescription = { name : "torreta", original_height : 180, file_sizes : [13112], original_width : 200, files : ["torreta.png"], type : "image"};
 	this.torretaName = "torreta";
@@ -23275,14 +23779,14 @@ var kha__$Assets_ImageList = function() {
 	this.introDescription = { name : "intro", original_height : 690, file_sizes : [32622], original_width : 1300, files : ["intro.png"], type : "image"};
 	this.introName = "intro";
 	this.intro = null;
-	this.heroSize = 16820;
-	this.heroDescription = { name : "hero", original_height : 180, file_sizes : [16820], original_width : 225, files : ["hero.png"], type : "image"};
-	this.heroName = "hero";
-	this.hero = null;
 	this.cuboSize = 871;
 	this.cuboDescription = { name : "cubo", original_height : 45, file_sizes : [871], original_width : 90, files : ["cubo.png"], type : "image"};
 	this.cuboName = "cubo";
 	this.cubo = null;
+	this.chellSize = 11473;
+	this.chellDescription = { name : "chell", original_height : 180, file_sizes : [11473], original_width : 225, files : ["chell.png"], type : "image"};
+	this.chellName = "chell";
+	this.chell = null;
 	this.cakeSize = 3441;
 	this.cakeDescription = { name : "cake", original_height : 45, file_sizes : [3441], original_width : 45, files : ["cake.png"], type : "image"};
 	this.cakeName = "cake";
@@ -23341,6 +23845,19 @@ kha__$Assets_ImageList.prototype = {
 		this.cake.unload();
 		this.cake = null;
 	}
+	,chell: null
+	,chellName: null
+	,chellDescription: null
+	,chellSize: null
+	,chellLoad: function(done,failure) {
+		kha_Assets.loadImage("chell",function(image) {
+			done();
+		},failure,{ fileName : "kha/internal/AssetsBuilder.hx", lineNumber : 136, className : "kha._Assets.ImageList", methodName : "chellLoad"});
+	}
+	,chellUnload: function() {
+		this.chell.unload();
+		this.chell = null;
+	}
 	,cubo: null
 	,cuboName: null
 	,cuboDescription: null
@@ -23353,19 +23870,6 @@ kha__$Assets_ImageList.prototype = {
 	,cuboUnload: function() {
 		this.cubo.unload();
 		this.cubo = null;
-	}
-	,hero: null
-	,heroName: null
-	,heroDescription: null
-	,heroSize: null
-	,heroLoad: function(done,failure) {
-		kha_Assets.loadImage("hero",function(image) {
-			done();
-		},failure,{ fileName : "kha/internal/AssetsBuilder.hx", lineNumber : 136, className : "kha._Assets.ImageList", methodName : "heroLoad"});
-	}
-	,heroUnload: function() {
-		this.hero.unload();
-		this.hero = null;
 	}
 	,intro: null
 	,introName: null
@@ -23448,7 +23952,7 @@ kha__$Assets_SoundList.prototype = {
 	,__class__: kha__$Assets_SoundList
 };
 var kha__$Assets_BlobList = function() {
-	this.names = ["boton1_xcf","boton2_xcf","cubo_xcf","intro_xcf","laser_xcf","puerta_xcf","room1_tmx","roomFinal_tmx","testRoom_tmx","tilesPortal_tsx","tilesPortal_xcf","torreta_xcf"];
+	this.names = ["boton1_xcf","boton2_xcf","chell_xcf","cubo_xcf","intro_xcf","laser_xcf","puerta_xcf","room1_tmx","roomFinal_tmx","testRoom_tmx","tilesPortal_tsx","tilesPortal_xcf","torreta_xcf"];
 	this.torreta_xcfSize = 72947;
 	this.torreta_xcfDescription = { name : "torreta_xcf", file_sizes : [72947], files : ["torreta.xcf"], type : "blob"};
 	this.torreta_xcfName = "torreta_xcf";
@@ -23489,6 +23993,10 @@ var kha__$Assets_BlobList = function() {
 	this.cubo_xcfDescription = { name : "cubo_xcf", file_sizes : [4585], files : ["cubo.xcf"], type : "blob"};
 	this.cubo_xcfName = "cubo_xcf";
 	this.cubo_xcf = null;
+	this.chell_xcfSize = 52385;
+	this.chell_xcfDescription = { name : "chell_xcf", file_sizes : [52385], files : ["chell.xcf"], type : "blob"};
+	this.chell_xcfName = "chell_xcf";
+	this.chell_xcf = null;
 	this.boton2_xcfSize = 2727;
 	this.boton2_xcfDescription = { name : "boton2_xcf", file_sizes : [2727], files : ["boton2.xcf"], type : "blob"};
 	this.boton2_xcfName = "boton2_xcf";
@@ -23529,6 +24037,19 @@ kha__$Assets_BlobList.prototype = {
 	,boton2_xcfUnload: function() {
 		this.boton2_xcf.unload();
 		this.boton2_xcf = null;
+	}
+	,chell_xcf: null
+	,chell_xcfName: null
+	,chell_xcfDescription: null
+	,chell_xcfSize: null
+	,chell_xcfLoad: function(done,failure) {
+		kha_Assets.loadBlob("chell_xcf",function(blob) {
+			done();
+		},failure,{ fileName : "kha/internal/AssetsBuilder.hx", lineNumber : 144, className : "kha._Assets.BlobList", methodName : "chell_xcfLoad"});
+	}
+	,chell_xcfUnload: function() {
+		this.chell_xcf.unload();
+		this.chell_xcf = null;
 	}
 	,cubo_xcf: null
 	,cubo_xcfName: null
@@ -53596,7 +54117,7 @@ states_EndGame.prototype = $extend(com_framework_utils_State.prototype,{
 		var atlas = new com_loading_basicResources_JoinAtlas(2048,2048);
 		atlas.add(new com_loading_basicResources_FontLoader("Kenney_Thick",20));
 		atlas.add(new com_loading_basicResources_TilesheetLoader("tilesPortal",32,32,0));
-		atlas.add(new com_loading_basicResources_SpriteSheetLoader("hero",45,60,0,[new com_loading_basicResources_Sequence("fall",[0]),new com_loading_basicResources_Sequence("slide",[0]),new com_loading_basicResources_Sequence("jump",[1]),new com_loading_basicResources_Sequence("run",[2,3,4,5,6,7,8,9]),new com_loading_basicResources_Sequence("idle",[10]),new com_loading_basicResources_Sequence("wallGrab",[11])]));
+		atlas.add(new com_loading_basicResources_SpriteSheetLoader("chell",45,60,0,[new com_loading_basicResources_Sequence("fall",[0]),new com_loading_basicResources_Sequence("slide",[1]),new com_loading_basicResources_Sequence("jump",[0]),new com_loading_basicResources_Sequence("run",[2,3,4,5,6,7]),new com_loading_basicResources_Sequence("idle",[10])]));
 		atlas.add(new com_loading_basicResources_ImageLoader("cake"));
 		resources.add(atlas);
 	}
@@ -53718,7 +54239,7 @@ states_GameState.prototype = $extend(com_framework_utils_State.prototype,{
 		var atlas = new com_loading_basicResources_JoinAtlas(2048,2048);
 		atlas.add(new com_loading_basicResources_FontLoader("Kenney_Thick",20));
 		atlas.add(new com_loading_basicResources_TilesheetLoader("tilesPortal",32,32,0));
-		atlas.add(new com_loading_basicResources_SpriteSheetLoader("hero",45,60,0,[new com_loading_basicResources_Sequence("fall",[0]),new com_loading_basicResources_Sequence("slide",[0]),new com_loading_basicResources_Sequence("jump",[1]),new com_loading_basicResources_Sequence("run",[2,3,4,5,6,7,8,9]),new com_loading_basicResources_Sequence("idle",[10]),new com_loading_basicResources_Sequence("wallGrab",[11])]));
+		atlas.add(new com_loading_basicResources_SpriteSheetLoader("chell",45,60,0,[new com_loading_basicResources_Sequence("fall",[0]),new com_loading_basicResources_Sequence("slide",[1]),new com_loading_basicResources_Sequence("jump",[0]),new com_loading_basicResources_Sequence("run",[2,3,4,5,6,7]),new com_loading_basicResources_Sequence("idle",[10])]));
 		atlas.add(new com_loading_basicResources_SpriteSheetLoader("torreta",50,60,0,[new com_loading_basicResources_Sequence("idle",[0]),new com_loading_basicResources_Sequence("open",[1,2]),new com_loading_basicResources_Sequence("falling",[3]),new com_loading_basicResources_Sequence("detect",[0,4]),new com_loading_basicResources_Sequence("fall",[5,6,7]),new com_loading_basicResources_Sequence("death",[8,9,10,11])]));
 		atlas.add(new com_loading_basicResources_SpriteSheetLoader("puerta",50,60,0,[new com_loading_basicResources_Sequence("idle",[0]),new com_loading_basicResources_Sequence("open",[1,2,3,4,5,6,7,8,9]),new com_loading_basicResources_Sequence("close",[8,7,6,5,4,3,2,1,0])]));
 		atlas.add(new com_loading_basicResources_ImageLoader("boton2"));
@@ -53744,15 +54265,15 @@ states_GameState.prototype = $extend(com_framework_utils_State.prototype,{
 		this.worldMap.init($bind(this,this.parseTileLayers),$bind(this,this.parseMapObjects));
 		states_GlobalGameData.worldMap = this.worldMap;
 		this.stage.cameras[0].limits(64,0,this.worldMap.widthIntTiles * 32 - 128,this.worldMap.heightInTiles * 32);
+		states_GlobalGameData.camera = this.stage.cameras[0];
 		this.createTouchJoystick();
 	}
 	,createTouchJoystick: function() {
 		this.touchJoystick = new com_framework_utils_VirtualGamepad();
-		this.touchJoystick.addKeyButton(14,37);
-		this.touchJoystick.addKeyButton(15,39);
-		this.touchJoystick.addKeyButton(12,38);
-		this.touchJoystick.addKeyButton(0,32);
-		this.touchJoystick.addKeyButton(2,88);
+		this.touchJoystick.addKeyButton(14,65);
+		this.touchJoystick.addKeyButton(15,68);
+		this.touchJoystick.addKeyButton(12,87);
+		this.touchJoystick.addKeyButton(0,87);
 		this.touchJoystick.notify(($_=this.chell,$bind($_,$_.onAxisChange)),($_=this.chell,$bind($_,$_.onButtonChange)));
 		var gamepad = com_framework_utils_Input.i.getGamepad(0);
 		gamepad.notify(($_=this.chell,$bind($_,$_.onAxisChange)),($_=this.chell,$bind($_,$_.onButtonChange)));
@@ -53837,6 +54358,8 @@ states_GameState.prototype = $extend(com_framework_utils_State.prototype,{
 		}
 		if(com_collision_platformer_CollisionEngine.overlap(this.chell.collision,this.zone2)) {
 			this.stage.cameras[0].setTarget(this.zone2.x + kha_System.windowWidth() * 0.5,this.zone2.y);
+			states_GlobalGameData.camera = this.stage.cameras[0];
+			this.chell.getCube = false;
 			com_collision_platformer_CollisionEngine.collide(this.chell.collision,this.back);
 			this.back.staticObject = true;
 		}
@@ -53887,8 +54410,8 @@ states_GameState.prototype = $extend(com_framework_utils_State.prototype,{
 	}
 	,draw: function(framebuffer) {
 		com_framework_utils_State.prototype.draw.call(this,framebuffer);
-		var camera = this.stage.cameras[0];
-		com_collision_platformer_CollisionEngine.renderDebug(framebuffer,camera);
+		var cameraAux = this.stage.cameras[0];
+		com_collision_platformer_CollisionEngine.renderDebug(framebuffer,cameraAux);
 	}
 	,__class__: states_GameState
 });
@@ -54373,9 +54896,9 @@ kha_netsync_Session.RPC_ALL = 1;
 kha_netsync_SyncBuilder.nextId = 0;
 kha_netsync_SyncBuilder.objects = [];
 states_GlobalGameData.roomFinal = "1";
-states_GlobalGameData.blue = 88;
-states_GlobalGameData.orange = 90;
-states_GlobalGameData.action = 65;
+states_GlobalGameData.blue = 81;
+states_GlobalGameData.orange = 69;
+states_GlobalGameData.action = 82;
 Main.main();
 })(typeof exports != "undefined" ? exports : typeof window != "undefined" ? window : typeof self != "undefined" ? self : this, typeof window != "undefined" ? window : typeof global != "undefined" ? global : typeof self != "undefined" ? self : this);
 

@@ -13,20 +13,20 @@ import com.gEngine.display.Sprite;
 class Projection extends Entity {
 	var display:RectangleDisplay;
 	public var collision:CollisionBox;
-	public var portal:KeyCode;
-	var width:Int = 5;
-	var height:Int = 5;
-	var speed:Float = 400;
+	//public var portal:KeyCode;
+	var width:Int = 4;
+	var height:Int = 4;
+	var speed:Float = 500;
 	var time:Float = 0;
 
-	public function new(x:Float, y:Float, dir:FastVector2,pressedKey:KeyCode,collisionGroup:CollisionGroup) {
+	public function new(x:Float, y:Float, dir:FastVector2,collisionGroup:CollisionGroup) {
 		super();
 		display = new RectangleDisplay();
 		display.setColor(255, 255, 255);
 		display.scaleX = width;
 		display.scaleY = height;
 		GlobalGameData.simulationLayer.addChild(display);
-		portal = pressedKey;
+		//portal = pressedKey;
 		collision = new CollisionBox();
 		collision.width = width;
 		collision.height = height;
@@ -44,6 +44,9 @@ class Projection extends Entity {
 		collision.update(dt);
 		if (time > 4) {
 			die();
+		}
+		if (time > 0.15) {
+			display.visible = false;
 		}
 	}
 

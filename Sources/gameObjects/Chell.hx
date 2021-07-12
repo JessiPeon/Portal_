@@ -1,5 +1,6 @@
 package gameObjects;
 
+import js.lib.webassembly.Global;
 import com.collision.platformer.ICollider;
 import com.collision.platformer.CollisionEngine;
 import com.collision.platformer.CollisionGroup;
@@ -23,8 +24,9 @@ class Chell extends Entity {
 	public var bluePortal:BluePortal = null;
 	public var orangePortal:OrangePortal = null;
 	public var getCube:Bool = false;
-	var maxSpeed = 400;
+	var maxSpeed = 300;
 	var facingDir:FastVector2 = new FastVector2(1,0);
+	var facingDirProy:FastVector2 = new FastVector2(1,0);
 	static var maxLife = 10000;
 	var life = maxLife;
 	var lastAccelerationX:Float;
@@ -35,16 +37,17 @@ class Chell extends Entity {
 
 	public function new(x:Float,y:Float) {
 		super();
-		display = new Sprite("hero");
+		display = new Sprite("chell");
 		display.smooth = false;
 		GlobalGameData.simulationLayer.addChild(display);
 		collision = new CollisionBox();
-		collision.width = display.width();
-		collision.height = display.height()*0.5;
+		collision.width = display.width()*0.5;
+		collision.height = display.height()*0.75;
 		display.pivotX=display.width()*0.5;
-		display.offsetY = -display.height()*0.5;
+		display.offsetX = -display.width()*0.1;
+		display.offsetY = -display.height()*0.25;
 		
-		display.scaleX = -1;
+		display.scaleX = 1;
 		display.scaleY = 1;
 		collision.x=x;
 		collision.y=y;
@@ -53,7 +56,7 @@ class Chell extends Entity {
 		collision.accelerationY = 2000;
 		collision.maxVelocityX = 500;
 		collision.maxVelocityY = 800;
-		collision.dragX = 0.9;
+		collision.dragX = 0.3;
 		
 		projectionCollision=new CollisionGroup();
 		blueCollision=new CollisionGroup();
@@ -67,17 +70,9 @@ class Chell extends Entity {
 		if (life < maxLife && life > 0){
 			life += 10;
 		}
-		//CollisionEngine.overlap(GlobalGameData.worldMap.collision,projectionCollision,portalOnWall);
 		if (projectionCollision != null){
 			collidePortalOnWall(GlobalGameData.worldMap.collision,projectionCollision,portalOnWall);
 		}
-		/*if (CollisionEngine.collide(GlobalGameData.worldMap.collision,projectionCollision)){
-			portalOnWall(GlobalGameData.worldMap.collision,projectionCollision);
-		}*/
-		/*time += dt;
-		if (time > 1 && oppositeDir) {
-			oppositeDir=false;
-		}*/
 		
 		if (bluePortal != null && orangePortal != null){
 			collideChellVsPortal(collision,orangeCollision,chellVsOrangePortal);
@@ -100,58 +95,55 @@ class Chell extends Entity {
 	}
 
 	function shoot() {
-		if (Input.i.isKeyCodePressed(GlobalGameData.blue)) {
-			var projection:Projection = new Projection(collision.x + collision.width * 0.5, collision.y + collision.height * 0.5, facingDir,GlobalGameData.blue,projectionCollision);
-			addChild(projection);
-		}
-
-		if (Input.i.isKeyCodePressed(GlobalGameData.orange)) {
-			var projection:Projection = new Projection(collision.x + collision.width * 0.5, collision.y + collision.height * 0.5, facingDir,GlobalGameData.orange,projectionCollision);
-			addChild(projection);
-		}
+		var mousePosition = GlobalGameData.camera.screenToWorld(Input.i.getMouseX(),Input.i.getMouseY());
+		facingDirProy.x = mousePosition.x - collision.x;
+		facingDirProy.y = mousePosition.y - collision.y;
+		facingDirProy.setFrom(facingDirProy.normalized());
+		var projection:Projection = new Projection(collision.x + collision.width * 0.5, collision.y + collision.height * 0.25, facingDirProy,projectionCollision);
+		addChild(projection);
 	}
 
 	function portalOnWall(worldC:ICollider,projectionsC:ICollider){
 		var currentProjection:Projection = cast projectionsC.userData;
-		if (currentProjection != null){
-		var side:Int = 99;
-		
-		if (currentProjection.collision.isTouching(Sides.BOTTOM)) {
-			side = Sides.BOTTOM;
-		} else
-		if (currentProjection.collision.isTouching(Sides.TOP)) {
-			side = Sides.TOP;
-		} else
-		if (currentProjection.collision.isTouching(Sides.LEFT)) {
-			side = Sides.LEFT;
-		} else
-		if (currentProjection.collision.isTouching(Sides.RIGHT)) {
-			side = Sides.RIGHT;
-		} 
+		if (Input.i.isKeyCodePressed(GlobalGameData.orange) || Input.i.isKeyCodePressed(GlobalGameData.blue)){
+			var side:Int = 99;
+			
+			if (currentProjection.collision.isTouching(Sides.BOTTOM)) {
+				side = Sides.BOTTOM;
+			} else
+			if (currentProjection.collision.isTouching(Sides.TOP)) {
+				side = Sides.TOP;
+			} else
+			if (currentProjection.collision.isTouching(Sides.LEFT)) {
+				side = Sides.LEFT;
+			} else
+			if (currentProjection.collision.isTouching(Sides.RIGHT)) {
+				side = Sides.RIGHT;
+			} 
 
-		
-		var posX:Float = currentProjection.collision.lastX;
-		var posY:Float = currentProjection.collision.lastY;
-		var portal:KeyCode = currentProjection.portal;
-		if (portal == GlobalGameData.blue){
-			if (GlobalGameData.bluePortal != null){
-				GlobalGameData.bluePortal.die();
+			
+			var posX:Float = currentProjection.collision.lastX;
+			var posY:Float = currentProjection.collision.lastY;
+			if (Input.i.isKeyCodePressed(GlobalGameData.blue)){
+				if (GlobalGameData.bluePortal != null){
+					GlobalGameData.bluePortal.die();
+				}
+				bluePortal = new BluePortal(posX, posY,blueCollision,side);
+				GlobalGameData.bluePortal = bluePortal;
+				addChild(bluePortal);
+			} else {
+				if (GlobalGameData.orangePortal != null){
+					GlobalGameData.orangePortal.die();
+				}
+				orangePortal = new OrangePortal(posX, posY,orangeCollision,side);
+				GlobalGameData.orangePortal = orangePortal;
+				addChild(orangePortal);
 			}
-			bluePortal = new BluePortal(posX, posY,blueCollision,side);
-			GlobalGameData.bluePortal = bluePortal;
-			addChild(bluePortal);
-		} else {
-			if (GlobalGameData.orangePortal != null){
-				GlobalGameData.orangePortal.die();
-			}
-			orangePortal = new OrangePortal(posX, posY,orangeCollision,side);
-			GlobalGameData.orangePortal = orangePortal;
-			addChild(orangePortal);
+			
+
+			
 		}
-		
-
 		currentProjection.die();
-		}
 	}
 
 
@@ -213,9 +205,6 @@ class Chell extends Entity {
 		super.render();
 		var s = Math.abs(collision.velocityX / collision.maxVelocityX);
 		display.timeline.frameRate = (1 / 24) * s + (1 - s) * (1 / 10);
-		/*if (isWallGrabing()) {
-			display.timeline.playAnimation("wallGrab");
-		} else*/
 		if (collision.isTouching(Sides.BOTTOM) && collision.velocityX * collision.accelerationX < 0) {
 			display.timeline.playAnimation("slide");
 		} else if (collision.isTouching(Sides.BOTTOM) && collision.velocityX == 0) {
@@ -229,6 +218,11 @@ class Chell extends Entity {
 		}
 		display.x = collision.x;
 		display.y = collision.y;
+		if (facingDirProy.x < 0){
+			display.scaleX = -Math.abs(display.scaleX);
+		} else {
+			display.scaleX = Math.abs(display.scaleX);
+		}
 		
 	}
 
@@ -240,9 +234,9 @@ class Chell extends Entity {
 		if (id == XboxJoystick.LEFT_DPAD ) {
 			if (value == 1) {
 				collision.accelerationX = -maxSpeed;
-				display.scaleX = Math.abs(display.scaleX);
+				display.scaleX = -Math.abs(display.scaleX);
 				facingDir.x = -1;
-
+				facingDirProy = facingDir;
 			} else {
 				if (collision.accelerationX < 0) {
 					collision.accelerationX = 0;
@@ -252,8 +246,9 @@ class Chell extends Entity {
 		if (id == XboxJoystick.RIGHT_DPAD ) {
 			if (value == 1) {
 				collision.accelerationX = maxSpeed;
-				display.scaleX = -Math.abs(display.scaleX);
+				display.scaleX = Math.abs(display.scaleX);
 				facingDir.x = 1;
+				facingDirProy = facingDir;
 			} else {
 				if (collision.accelerationX > 0) {
 					collision.accelerationX = 0;

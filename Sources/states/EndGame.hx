@@ -46,13 +46,12 @@ class EndGame extends State {
 		
 		atlas.add(new FontLoader("Kenney_Thick",20));
 		atlas.add(new TilesheetLoader("tilesPortal", 32, 32, 0));
-		atlas.add(new SpriteSheetLoader("hero", 45, 60, 0, [
+		atlas.add(new SpriteSheetLoader("chell", 45, 60, 0, [
 			new Sequence("fall", [0]),
-			new Sequence("slide", [0]),
-			new Sequence("jump", [1]),
-			new Sequence("run", [2, 3, 4, 5, 6, 7, 8, 9]),
-			new Sequence("idle", [10]),
-			new Sequence("wallGrab", [11])
+			new Sequence("slide", [1]),
+			new Sequence("jump", [0]),
+			new Sequence("run", [2, 3, 4, 5, 6, 7]),
+			new Sequence("idle", [10])
 		]));
 		atlas.add(new ImageLoader("cake"));
 		//atlas.add(new SpriteSheetLoader("cake", 45, 45, 0,[new Sequence("idle", [0])]) );

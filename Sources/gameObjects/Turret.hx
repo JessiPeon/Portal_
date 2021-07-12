@@ -96,6 +96,7 @@ class Turret extends Entity {
 	
 
     override function render() {
+		display.timeline.frameRate = 0.1;
 		super.render();
 		if (collision.isTouching(Sides.BOTTOM) && !death) {
 			display.timeline.playAnimation("idle");
@@ -109,6 +110,9 @@ class Turret extends Entity {
 
 	public function damage() {
 		bulletsCollision.clear();
+		display.timeline.playAnimation("falling",false);
+		display.timeline.playAnimation("fall",false);
+		display.timeline.playAnimation("fall",false);
 		display.timeline.playAnimation("fall",false);
         display.timeline.playAnimation("death",false);
 		death = true;

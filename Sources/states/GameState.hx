@@ -85,13 +85,12 @@ class GameState extends State {
 		//////////////////////////////
 
 		atlas.add(new TilesheetLoader("tilesPortal", 32, 32, 0));
-		atlas.add(new SpriteSheetLoader("hero", 45, 60, 0, [
+		atlas.add(new SpriteSheetLoader("chell", 45, 60, 0, [
 			new Sequence("fall", [0]),
-			new Sequence("slide", [0]),
-			new Sequence("jump", [1]),
-			new Sequence("run", [2, 3, 4, 5, 6, 7, 8, 9]),
-			new Sequence("idle", [10]),
-			new Sequence("wallGrab", [11])
+			new Sequence("slide", [1]),
+			new Sequence("jump", [0]),
+			new Sequence("run", [2, 3, 4, 5, 6, 7]),
+			new Sequence("idle", [10])
 		]));
 		atlas.add(new SpriteSheetLoader("torreta", 50, 60, 0, [
 			new Sequence("idle", [0]),
@@ -141,16 +140,16 @@ class GameState extends State {
 	
 
 		stage.defaultCamera().limits(32*2, 0, worldMap.widthIntTiles * 32 - 4*32, worldMap.heightInTiles * 32 );
+		GlobalGameData.camera = stage.defaultCamera();
 		createTouchJoystick();
 	}
 
 	function createTouchJoystick() {
 		touchJoystick = new VirtualGamepad();
-		touchJoystick.addKeyButton(XboxJoystick.LEFT_DPAD, KeyCode.Left);
-		touchJoystick.addKeyButton(XboxJoystick.RIGHT_DPAD, KeyCode.Right);
-		touchJoystick.addKeyButton(XboxJoystick.UP_DPAD, KeyCode.Up);
-		touchJoystick.addKeyButton(XboxJoystick.A, KeyCode.Space);
-		touchJoystick.addKeyButton(XboxJoystick.X, KeyCode.X);
+		touchJoystick.addKeyButton(XboxJoystick.LEFT_DPAD, KeyCode.A);
+		touchJoystick.addKeyButton(XboxJoystick.RIGHT_DPAD, KeyCode.D);
+		touchJoystick.addKeyButton(XboxJoystick.UP_DPAD, KeyCode.W);
+		touchJoystick.addKeyButton(XboxJoystick.A, KeyCode.W);
 		
 		touchJoystick.notify(chell.onAxisChange, chell.onButtonChange);
 
@@ -256,6 +255,8 @@ class GameState extends State {
 		if(CollisionEngine.overlap(chell.collision,zone2)){
 			//stage.defaultCamera().setTarget(chell.collision.x, chell.collision.y);
 			stage.defaultCamera().setTarget(zone2.x+Screen.getWidth()*0.5, zone2.y);
+			GlobalGameData.camera = stage.defaultCamera();
+			chell.getCube = false;
 			CollisionEngine.collide(chell.collision,back);
 			back.staticObject=true;
 		}
@@ -315,8 +316,8 @@ class GameState extends State {
 	#if DEBUGDRAW
 	override function draw(framebuffer:kha.Canvas) {
 		super.draw(framebuffer);
-		var camera = stage.defaultCamera();
-		CollisionEngine.renderDebug(framebuffer, camera);
+		var cameraAux = stage.defaultCamera();
+		CollisionEngine.renderDebug(framebuffer, cameraAux);
 	}
 	#end
 }

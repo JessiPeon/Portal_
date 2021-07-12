@@ -303,6 +303,28 @@
 			"original_height": 45
 		},
 		{
+			"name": "chell",
+			"files": [
+				"chell.png"
+			],
+			"file_sizes": [
+				11473
+			],
+			"type": "image",
+			"original_width": 225,
+			"original_height": 180
+		},
+		{
+			"name": "chell_xcf",
+			"files": [
+				"chell.xcf"
+			],
+			"file_sizes": [
+				52385
+			],
+			"type": "blob"
+		},
+		{
 			"name": "cubo",
 			"files": [
 				"cubo.png"
@@ -517,18 +539,6 @@
 					]
 				}
 			]
-		},
-		{
-			"name": "hero",
-			"files": [
-				"hero.png"
-			],
-			"file_sizes": [
-				16820
-			],
-			"type": "image",
-			"original_width": 225,
-			"original_height": 180
 		},
 		{
 			"name": "intro",
