@@ -34,8 +34,7 @@ class Portal extends Entity{
 		display = new RectangleDisplay();
 		
 		//display.setColor(0, 0, 255);
-		display.scaleX = 10;
-		display.scaleY = 10;
+		display.scaleX = display.scaleY = 10;
 		GlobalGameData.simulationLayer.addChild(display);
 		side = sideP;
 		collision = new CollisionBox();

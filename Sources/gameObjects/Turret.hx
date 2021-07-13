@@ -23,7 +23,7 @@ class Turret extends Entity {
 	var facingDir2:FastVector2 = new FastVector2(-1,0);
 	var death = false;
 
-    public function new(x:Float,y:Float,groupCollision:CollisionGroup) {
+    public function new(x:Float,y:Float,dir:Int,groupCollision:CollisionGroup) {
         super();
 		display = new Sprite("torreta");
 		display.smooth = false;
@@ -35,8 +35,9 @@ class Turret extends Entity {
 		display.pivotX=display.width()*0.5;
 		display.offsetY = -display.height()*0.5;
 		display.offsetX = -display.width()*0.25;
-
-        display.scaleX = display.scaleY = 1;
+		facingDir.x = dir;
+        display.scaleX = -dir;
+		display.scaleY = 1;
 		collision.x=x;
 		collision.y=y;
 

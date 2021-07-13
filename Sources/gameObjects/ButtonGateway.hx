@@ -24,7 +24,7 @@ class ButtonGateway extends Entity {
 
     public function new(x:Float,y:Float,groupCollision:CollisionGroup,gatewayP:Gateway) {
         super();
-		display = new Sprite("boton2");
+		display = new Sprite("botonPuerta");
 		display.smooth = false;
 		GlobalGameData.simulationLayer.addChild(display);
 		collision = new CollisionBox();

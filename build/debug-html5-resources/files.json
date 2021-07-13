@@ -57,6 +57,16 @@
 			"type": "font"
 		},
 		{
+			"name": "Oh_No",
+			"files": [
+				"Oh No.ttf"
+			],
+			"file_sizes": [
+				888980
+			],
+			"type": "font"
+		},
+		{
 			"name": "ShBrightness_frag",
 			"files": [
 				"ShBrightness.frag.essl",
@@ -287,6 +297,40 @@
 			],
 			"file_sizes": [
 				2727
+			],
+			"type": "blob"
+		},
+		{
+			"name": "botonLaser",
+			"files": [
+				"botonLaser.png"
+			],
+			"file_sizes": [
+				237
+			],
+			"type": "image",
+			"original_width": 32,
+			"original_height": 32
+		},
+		{
+			"name": "botonPuerta",
+			"files": [
+				"botonPuerta.png"
+			],
+			"file_sizes": [
+				298
+			],
+			"type": "image",
+			"original_width": 32,
+			"original_height": 32
+		},
+		{
+			"name": "botonPuerta_xcf",
+			"files": [
+				"botonPuerta.xcf"
+			],
+			"file_sizes": [
+				2647
 			],
 			"type": "blob"
 		},
@@ -1442,6 +1486,40 @@
 			]
 		},
 		{
+			"name": "portalAzul",
+			"files": [
+				"portalAzul.png"
+			],
+			"file_sizes": [
+				1713
+			],
+			"type": "image",
+			"original_width": 45,
+			"original_height": 45
+		},
+		{
+			"name": "portalNaranja",
+			"files": [
+				"portalNaranja.png"
+			],
+			"file_sizes": [
+				1262
+			],
+			"type": "image",
+			"original_width": 45,
+			"original_height": 45
+		},
+		{
+			"name": "portal_xcf",
+			"files": [
+				"portal.xcf"
+			],
+			"file_sizes": [
+				6728
+			],
+			"type": "blob"
+		},
+		{
 			"name": "puerta",
 			"files": [
 				"puerta.png"
@@ -1528,12 +1606,42 @@
 			"types": []
 		},
 		{
+			"name": "room1_base_tmx",
+			"files": [
+				"room1 base.tmx"
+			],
+			"file_sizes": [
+				32742
+			],
+			"type": "blob"
+		},
+		{
 			"name": "room1_tmx",
 			"files": [
 				"room1.tmx"
 			],
 			"file_sizes": [
-				26400
+				33722
+			],
+			"type": "blob"
+		},
+		{
+			"name": "room2_tmx",
+			"files": [
+				"room2.tmx"
+			],
+			"file_sizes": [
+				34230
+			],
+			"type": "blob"
+		},
+		{
+			"name": "room3_tmx",
+			"files": [
+				"room3.tmx"
+			],
+			"file_sizes": [
+				32696
 			],
 			"type": "blob"
 		},
@@ -1543,7 +1651,7 @@
 				"roomFinal.tmx"
 			],
 			"file_sizes": [
-				12937
+				19255
 			],
 			"type": "blob"
 		},
@@ -2221,7 +2329,7 @@
 				"tilesPortal.png"
 			],
 			"file_sizes": [
-				2789
+				3005
 			],
 			"type": "image",
 			"original_width": 64,
@@ -2243,7 +2351,7 @@
 				"tilesPortal.xcf"
 			],
 			"file_sizes": [
-				19783
+				24533
 			],
 			"type": "blob"
 		},

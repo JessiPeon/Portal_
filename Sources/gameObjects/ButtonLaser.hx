@@ -23,7 +23,7 @@ class ButtonLaser extends Entity {
 
     public function new(x:Float,y:Float,groupCollision:CollisionGroup,laserP:Laser) {
         super();
-		display = new Sprite("boton1");
+		display = new Sprite("botonLaser");
 		display.smooth = false;
 		GlobalGameData.simulationLayer.addChild(display);
 		collision = new CollisionBox();

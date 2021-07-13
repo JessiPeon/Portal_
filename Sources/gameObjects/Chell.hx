@@ -29,11 +29,12 @@ class Chell extends Entity {
 	var facingDirProy:FastVector2 = new FastVector2(1,0);
 	static var maxLife = 10000;
 	var life = maxLife;
+	var deadChell = false;
 	var lastAccelerationX:Float;
 	var lastAccelerationY:Float;
-
 	//var lastWallGrabing:Float=0;
 	var sideTouching:Int;
+	var time:Float = 0;
 
 	public function new(x:Float,y:Float) {
 		super();
@@ -67,9 +68,25 @@ class Chell extends Entity {
 
 		shoot();
 		super.update(dt);
-		if (life < maxLife && life > 0){
+		if (life < maxLife && life > 0 && !deadChell){
 			life += 10;
 		}
+		var frenar = false;
+		/*if (collision.accelerationX > 2*maxSpeed){
+			//frenar=true;
+			collision.accelerationX=2*maxSpeed;
+			collision.dragX = 0.1;
+		} else {
+			collision.dragX = 0.3;
+		}*/
+		/*if (frenar){
+			time += dt;
+			if (time >= 1 ) {
+				collision.accelerationX=maxSpeed;
+				frenar=false;
+			}
+		}*/
+		
 		if (projectionCollision != null){
 			collidePortalOnWall(GlobalGameData.worldMap.collision,projectionCollision,portalOnWall);
 		}
@@ -108,7 +125,7 @@ class Chell extends Entity {
 		var x:Int = Std.int( (currentProjection.collision.x + currentProjection.collision.width / 2) / 32) ;
 		var y:Int = Std.int( (currentProjection.collision.y + currentProjection.collision.height + 1) / 32);
 		var type:Int = GlobalGameData.bloqPortalMap.getTile(x, y);
-		if (type == 0){
+		//if (type == 0){
 			if (Input.i.isKeyCodePressed(GlobalGameData.orange) || Input.i.isKeyCodePressed(GlobalGameData.blue)){
 				var side:Int = 99;
 				
@@ -145,7 +162,7 @@ class Chell extends Entity {
 				}
 				
 			}
-		}
+		//}
 		
 		currentProjection.die();
 	}
@@ -204,7 +221,7 @@ class Chell extends Entity {
 			(((GlobalGameData.bluePortal.side == Sides.RIGHT) || (GlobalGameData.bluePortal.side == Sides.LEFT)) && ((GlobalGameData.orangePortal.side == Sides.BOTTOM)||(GlobalGameData.orangePortal.side == Sides.TOP))  )){
 			collision.velocityX = collision.lastVelocityY;
 			collision.velocityY = collision.lastVelocityX;
-			collision.accelerationX = lastAccelerationY;
+			collision.accelerationX = collision.lastVelocityY;
 			//collision.accelerationY = lastAccelerationX;
 		} else {
 			collision.accelerationX = lastAccelerationX;
@@ -296,7 +313,13 @@ class Chell extends Entity {
 
 	public function damage() {
 		//display.timeline.playAnimation("fall",false);/
-		life = life - 50;
+		life = life - 200;
+    }
+
+	public function death() {
+		//display.timeline.playAnimation("fall",false);/
+		deadChell = true;
+		life = life -500;
     }
 /*
 	inline function isWallGrabing():Bool {

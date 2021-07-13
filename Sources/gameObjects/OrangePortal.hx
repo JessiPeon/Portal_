@@ -28,6 +28,9 @@ class OrangePortal extends Portal  {
     public function new(x:Float,y:Float,groupCollision:CollisionGroup,side:Int) {
 		super(x,y,groupCollision,side);
 
+		//display = new Sprite("torreta");
+		
+		//display.setColor(0, 0, 255);
 		this.display.setColor(255, 165, 0);
 		/*facingDir = new FastVector2(-1,0);
 		facingDir2 = new FastVector2(-1,0);

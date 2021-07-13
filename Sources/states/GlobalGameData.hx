@@ -12,7 +12,7 @@ import gameObjects.Chell;
 
 class GlobalGameData {
 	static public var simulationLayer:Layer;
-	static public var roomFinal:String = "1";
+	static public var roomFinal:String = "2";
 	static public var chell:Chell;
 	static public var worldMap:Tilemap;
 	static public var bluePortal:BluePortal = null;

@@ -1,0 +1,19 @@
+Num estudiante 202554 - Jessica Peón
+
+Repo GIT: https://github.com/JessiPeon/Portal_.git
+
+Comandos:
+W-Salta
+A-Izquierda
+D-Derecha
+Q-Portal azul
+E-Portal naranja
+R-Acción
+
+Consideraciones:
+
+* A veces surgen problemas con las colisiones de la proyección de la pistola de portales y hay como una "interferencia" que hace que no colisione con un tile.
+
+* Te dije que iba a hacer 3 rooms pero hice solo 2 porque me pareció que tenía que subir demasiado la complejidad al hacer una 3era.
+
+*Cosas que sé que me faltaron y me hubiera gustado hacer si me hubiera dado el tiempo: poder hacer que los tiles que son grilla no permitan crear portales, que las torretas tuvieran su propia projection que al impactar con el jugador ahi recien empezara a disparar y no que sea en una direccion aunque detecta al pj 360*, que el personaje cambie de color al recibir daño, ponerle grafico a los portales.

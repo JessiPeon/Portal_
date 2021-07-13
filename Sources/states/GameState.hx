@@ -1,5 +1,6 @@
 package states;
 
+import com.gEngine.display.StaticLayer;
 import kha.FastFloat;
 import com.loading.basicResources.ImageLoader;
 import gameObjects.Gateway;
@@ -52,12 +53,14 @@ class GameState extends State {
 	var laser:Laser;
 	var cube:Cube;
 	var simulationLayer:Layer;
+	var hudLayer:StaticLayer;
 	var touchJoystick:VirtualGamepad;
 	//var tray:helpers.Tray;
 	//var mayonnaiseMap:TileMapDisplay;
 	var bloqPortalMap:TileMapDisplay;
 	var room:String;
 	var winZone:CollisionBox;
+	var deathZone:CollisionBox;
 	var zone2:CollisionBox;
 	var back:CollisionBox;
 	var turretCollision:CollisionGroup= new CollisionGroup();
@@ -69,6 +72,7 @@ class GameState extends State {
 	//var blueCollision:CollisionGroup= new CollisionGroup();
 	// orangeCollision:CollisionGroup= new CollisionGroup();
 	var text:Text;
+	var displayCube:Sprite;
 
 
 	public function new(room:String, fromRoom:String) {
@@ -106,8 +110,8 @@ class GameState extends State {
 			new Sequence("open", [1,2,3,4,5,6,7,8,9]),
 			new Sequence("close", [8,7,6,5,4,3,2,1,0])
 		]));
-		atlas.add(new ImageLoader("boton2"));
-		atlas.add(new ImageLoader("boton1"));
+		atlas.add(new ImageLoader("botonPuerta"));
+		atlas.add(new ImageLoader("botonLaser"));
 		atlas.add(new ImageLoader("laser"));
 		atlas.add(new SpriteSheetLoader("cubo", 45, 45, 0, [
 			new Sequence("idle", [0]),
@@ -121,6 +125,8 @@ class GameState extends State {
 		stageColor(0.5, 0.5, 0.5);
 		simulationLayer = new Layer();
 		stage.addChild(simulationLayer);
+		hudLayer = new StaticLayer();
+		stage.addChild(hudLayer);
 
 		////////////////////////////
 		
@@ -139,8 +145,16 @@ class GameState extends State {
 		GlobalGameData.worldMap = worldMap;
 		GlobalGameData.bloqPortalMap = bloqPortalMap;
 		//tray = new Tray(mayonnaiseMap);
+		displayCube= new Sprite("cubo");
+		displayCube.smooth = false;
+		displayCube.x=20;
+		displayCube.y=20;
+		displayCube.timeline.playAnimation("idle",false);
+		displayCube.scaleX = displayCube.scaleY = 0.75;
+		hudLayer.addChild(displayCube);
+		hudLayer.visible=false;
 
-		stage.defaultCamera().limits(32*2, 0, worldMap.widthIntTiles * 32 - 4*32, worldMap.heightInTiles * 32 );
+		stage.defaultCamera().limits(32*2, 0, worldMap.widthIntTiles * 32 - 4*32, worldMap.heightInTiles * 32 -16 );
 		GlobalGameData.camera = stage.defaultCamera();
 		createTouchJoystick();
 	}
@@ -190,6 +204,14 @@ class GameState extends State {
 			winZone.width=object.width;
 			winZone.height=object.height;
 		}else
+		if(compareName(object,"deathZone"))
+			{
+				deathZone=new CollisionBox();
+				deathZone.x=object.x;
+				deathZone.y=object.y;
+				deathZone.width=object.width;
+				deathZone.height=object.height;
+			}else
 		if(compareName(object,"zone2"))
 		{
 			zone2=new CollisionBox();
@@ -207,19 +229,23 @@ class GameState extends State {
 			back.height=object.height;
 			back.staticObject=false;
 		}else
-		if(compareName(object,"enemyZone")){
-			turret = new Turret(object.x, object.y,turretCollision);
+		if(compareName(object,"enemyZoneDer")){
+			turret = new Turret(object.x, object.y,1,turretCollision);
+			addChild(turret);
+		}
+		if(compareName(object,"enemyZoneIzq")){
+			turret = new Turret(object.x, object.y,-1,turretCollision);
 			addChild(turret);
 		}
 		if(compareName(object,"puerta")){
 			gateway = new Gateway(object.x+2, object.y-2*object.height+1,gatewayCollision);
 			addChild(gateway);
 		}
-		if(compareName(object,"boton2")){
+		if(compareName(object,"botonPuerta")){
 			buttonGateway = new ButtonGateway(object.x, object.y-object.height+1,buttonGatewayCollision,gateway);
 			addChild(buttonGateway);
 		}
-		if(compareName(object,"boton1")){
+		if(compareName(object,"botonLaser")){
 			buttonLaser = new ButtonLaser(object.x, object.y-object.height+1,buttonLaserCollision,laser);
 			addChild(buttonLaser);
 		}
@@ -240,11 +266,16 @@ class GameState extends State {
 		super.update(dt);
 		//stage.defaultCamera().setTarget(chell.collision.x, chell.collision.y);
 		#if DEBUGDRAW
-		text.text = Std.string(chell.getVida());
+		text.text = Std.string(chell.collision.accelerationX) + " " + Std.string(chell.collision.accelerationY)  + " - " +Std.string(Math.round(chell.collision.velocityX)) + " " + Std.string(Math.round(chell.collision.velocityY));
 		#end
 
 		if (chell.getVida() <= 0){
 			changeState(new LoseGame());
+		}
+
+		if (chell.getCube){
+			
+			hudLayer.visible = true;
 		}
 
 		CollisionEngine.collide(chell.collision,worldMap.collision);
@@ -255,10 +286,13 @@ class GameState extends State {
 				changeState(new EndGame());
 			} else {
 				var nuevaRoomInt:Int = cast room;
-				//nuevaRoomInt += 0;
+				nuevaRoomInt += 1;
 				var nuevaRoom:String = cast nuevaRoomInt;
 				changeState(new GameState(nuevaRoom,room));
 			}
+		}
+		if(CollisionEngine.overlap(chell.collision,deathZone)){
+			chell.death();
 		}
 		if(CollisionEngine.overlap(chell.collision,zone2)){
 			//stage.defaultCamera().setTarget(chell.collision.x, chell.collision.y);
@@ -292,19 +326,20 @@ class GameState extends State {
 	}
 	inline function chellVsButtonGateway(chellC:ICollider,buttonC:ICollider){
 		if (Input.i.isKeyCodePressed(GlobalGameData.action) && GlobalGameData.chell.getCube){
-		var currentButton:ButtonGateway = cast buttonC.userData;
-		var posX:FastFloat = currentButton.collision.x;
-		var posY:FastFloat = currentButton.collision.y;
-		var displayCube:Sprite = new Sprite("cubo");
-		displayCube.smooth = false;
-		displayCube.x=posX+20;
-		displayCube.y=posY-15;
-		displayCube.timeline.playAnimation("falling",false);
-		displayCube.scaleX = displayCube.scaleY = 1;
-		GlobalGameData.simulationLayer.addChild(displayCube);
-		GlobalGameData.chell.getCube = false;
-		currentButton.gateway.openGateway();
-		currentButton.destroy();
+			var currentButton:ButtonGateway = cast buttonC.userData;
+			var posX:FastFloat = currentButton.collision.x;
+			var posY:FastFloat = currentButton.collision.y;
+			var displayCube:Sprite = new Sprite("cubo");
+			displayCube.smooth = false;
+			displayCube.x=posX+20;
+			displayCube.y=posY-15;
+			displayCube.timeline.playAnimation("falling",false);
+			displayCube.scaleX = displayCube.scaleY = 1;
+			GlobalGameData.simulationLayer.addChild(displayCube);
+			GlobalGameData.chell.getCube = false;
+			hudLayer.visible = false;
+			currentButton.gateway.openGateway();
+			currentButton.destroy();
 		}
 	}
 	inline function cubeVsButtonGateway(chellC:ICollider,buttonC:ICollider){

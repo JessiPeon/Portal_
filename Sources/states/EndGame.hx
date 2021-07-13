@@ -54,6 +54,8 @@ class EndGame extends State {
 			new Sequence("idle", [10])
 		]));
 		atlas.add(new ImageLoader("cake"));
+		atlas.add(new ImageLoader("portalNaranja"));
+		atlas.add(new ImageLoader("portalAzul"));
 		//atlas.add(new SpriteSheetLoader("cake", 45, 45, 0,[new Sequence("idle", [0])]) );
 		resources.add(atlas);
 	}
@@ -76,7 +78,7 @@ class EndGame extends State {
 		stage.addChild(text);
 
 		stage.defaultCamera().limits(32*2, 0, worldMap.widthIntTiles * 32 - 4*32, worldMap.heightInTiles * 32 );
-
+		GlobalGameData.camera = stage.defaultCamera();
 
 		//temporal hasta poner camino
 		createTouchJoystick();
@@ -84,11 +86,10 @@ class EndGame extends State {
 
 	function createTouchJoystick() {
 		touchJoystick = new VirtualGamepad();
-		touchJoystick.addKeyButton(XboxJoystick.LEFT_DPAD, KeyCode.Left);
-		touchJoystick.addKeyButton(XboxJoystick.RIGHT_DPAD, KeyCode.Right);
-		touchJoystick.addKeyButton(XboxJoystick.UP_DPAD, KeyCode.Up);
-		touchJoystick.addKeyButton(XboxJoystick.A, KeyCode.Space);
-		touchJoystick.addKeyButton(XboxJoystick.X, KeyCode.X);
+		touchJoystick.addKeyButton(XboxJoystick.LEFT_DPAD, KeyCode.A);
+		touchJoystick.addKeyButton(XboxJoystick.RIGHT_DPAD, KeyCode.D);
+		touchJoystick.addKeyButton(XboxJoystick.UP_DPAD, KeyCode.W);
+		touchJoystick.addKeyButton(XboxJoystick.A, KeyCode.W);
 		
 		touchJoystick.notify(chell.onAxisChange, chell.onButtonChange);
 

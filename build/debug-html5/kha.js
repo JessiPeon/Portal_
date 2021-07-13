@@ -9437,6 +9437,58 @@ com_gEngine_display_Stage.prototype = {
 	,__class__: com_gEngine_display_Stage
 	,__properties__: {set_color:"set_color",set_y:"set_y",get_y:"get_y",set_x:"set_x",get_x:"get_x"}
 };
+var com_gEngine_display_StaticLayer = function() {
+	com_gEngine_display_Layer.call(this);
+	this.offset = new kha_math_FastMatrix4(1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1);
+};
+$hxClasses["com.gEngine.display.StaticLayer"] = com_gEngine_display_StaticLayer;
+com_gEngine_display_StaticLayer.__name__ = "com.gEngine.display.StaticLayer";
+com_gEngine_display_StaticLayer.__super__ = com_gEngine_display_Layer;
+com_gEngine_display_StaticLayer.prototype = $extend(com_gEngine_display_Layer.prototype,{
+	offset: null
+	,render: function(paintMode,transform) {
+		paintMode.render();
+		var proj = paintMode.camera.projection;
+		paintMode.camera.projection = paintMode.camera.orthogonal;
+		var _this = this.offset;
+		var m__00 = 1;
+		var m__10 = 0;
+		var m__20 = 0;
+		var m__30 = -paintMode.camera.width * 0.5;
+		var m__01 = 0;
+		var m__11 = 1;
+		var m__21 = 0;
+		var m__31 = -paintMode.camera.height * 0.5;
+		var m__02 = 0;
+		var m__12 = 0;
+		var m__22 = 1;
+		var m__32 = 0;
+		var m__03 = 0;
+		var m__13 = 0;
+		var m__23 = 0;
+		var m__33 = 1;
+		_this._00 = m__00;
+		_this._10 = m__10;
+		_this._20 = m__20;
+		_this._30 = m__30;
+		_this._01 = m__01;
+		_this._11 = m__11;
+		_this._21 = m__21;
+		_this._31 = m__31;
+		_this._02 = m__02;
+		_this._12 = m__12;
+		_this._22 = m__22;
+		_this._32 = m__32;
+		_this._03 = m__03;
+		_this._13 = m__13;
+		_this._23 = m__23;
+		_this._33 = m__33;
+		com_gEngine_display_Layer.prototype.render.call(this,paintMode,this.offset);
+		paintMode.render();
+		paintMode.camera.projection = proj;
+	}
+	,__class__: com_gEngine_display_StaticLayer
+});
 var com_gEngine_display_Text = function(type) {
 	this.alpha = 1;
 	this.bakedQuadCache = new kha_AlignedQuad();
@@ -19504,8 +19556,7 @@ var gameObjects_Portal = function(x,y,groupCollision,sideP) {
 	this.facingDir2 = new kha_math_FastVector2(-1,0);
 	this.death = false;
 	this.display = new com_gEngine_helpers_RectangleDisplay();
-	this.display.scaleX = 10;
-	this.display.scaleY = 10;
+	this.display.scaleX = this.display.scaleY = 10;
 	states_GlobalGameData.simulationLayer.addChild(this.display);
 	this.side = sideP;
 	this.collision = new com_collision_platformer_CollisionBox();
@@ -19608,7 +19659,7 @@ gameObjects_Bullet.prototype = $extend(com_framework_utils_Entity.prototype,{
 var gameObjects_ButtonGateway = function(x,y,groupCollision,gatewayP) {
 	this.active = false;
 	com_framework_utils_Entity.call(this);
-	this.display = new com_gEngine_display_Sprite("boton2");
+	this.display = new com_gEngine_display_Sprite("botonPuerta");
 	this.display.set_smooth(false);
 	states_GlobalGameData.simulationLayer.addChild(this.display);
 	this.collision = new com_collision_platformer_CollisionBox();
@@ -19654,7 +19705,7 @@ gameObjects_ButtonGateway.prototype = $extend(com_framework_utils_Entity.prototy
 var gameObjects_ButtonLaser = function(x,y,groupCollision,laserP) {
 	this.active = false;
 	com_framework_utils_Entity.call(this);
-	this.display = new com_gEngine_display_Sprite("boton1");
+	this.display = new com_gEngine_display_Sprite("botonLaser");
 	this.display.set_smooth(false);
 	states_GlobalGameData.simulationLayer.addChild(this.display);
 	this.collision = new com_collision_platformer_CollisionBox();
@@ -19698,6 +19749,8 @@ gameObjects_ButtonLaser.prototype = $extend(com_framework_utils_Entity.prototype
 	,__class__: gameObjects_ButtonLaser
 });
 var gameObjects_Chell = function(x,y) {
+	this.time = 0;
+	this.deadChell = false;
 	this.life = gameObjects_Chell.maxLife;
 	this.facingDirProy = new kha_math_FastVector2(1,0);
 	this.facingDir = new kha_math_FastVector2(1,0);
@@ -19747,15 +19800,18 @@ gameObjects_Chell.prototype = $extend(com_framework_utils_Entity.prototype,{
 	,facingDir: null
 	,facingDirProy: null
 	,life: null
+	,deadChell: null
 	,lastAccelerationX: null
 	,lastAccelerationY: null
 	,sideTouching: null
+	,time: null
 	,update: function(dt) {
 		this.shoot();
 		com_framework_utils_Entity.prototype.update.call(this,dt);
-		if(this.life < gameObjects_Chell.maxLife && this.life > 0) {
+		if(this.life < gameObjects_Chell.maxLife && this.life > 0 && !this.deadChell) {
 			this.life += 10;
 		}
+		var frenar = false;
 		if(this.projectionCollision != null) {
 			this.collidePortalOnWall(states_GlobalGameData.worldMap.collision,this.projectionCollision,$bind(this,this.portalOnWall));
 		}
@@ -20280,35 +20336,33 @@ gameObjects_Chell.prototype = $extend(com_framework_utils_Entity.prototype,{
 		var x = (currentProjection.collision.x + currentProjection.collision.width / 2) / 32 | 0;
 		var y = (currentProjection.collision.y + currentProjection.collision.height + 1) / 32 | 0;
 		var type = states_GlobalGameData.bloqPortalMap.getTile(x,y);
-		if(type == 0) {
-			if(com_framework_utils_Input.i.isKeyCodePressed(states_GlobalGameData.orange) || com_framework_utils_Input.i.isKeyCodePressed(states_GlobalGameData.blue)) {
-				var side = 99;
-				if(currentProjection.collision.isTouching(8)) {
-					side = 8;
-				} else if(currentProjection.collision.isTouching(4)) {
-					side = 4;
-				} else if(currentProjection.collision.isTouching(1)) {
-					side = 1;
-				} else if(currentProjection.collision.isTouching(2)) {
-					side = 2;
+		if(com_framework_utils_Input.i.isKeyCodePressed(states_GlobalGameData.orange) || com_framework_utils_Input.i.isKeyCodePressed(states_GlobalGameData.blue)) {
+			var side = 99;
+			if(currentProjection.collision.isTouching(8)) {
+				side = 8;
+			} else if(currentProjection.collision.isTouching(4)) {
+				side = 4;
+			} else if(currentProjection.collision.isTouching(1)) {
+				side = 1;
+			} else if(currentProjection.collision.isTouching(2)) {
+				side = 2;
+			}
+			var posX = currentProjection.collision.lastX;
+			var posY = currentProjection.collision.lastY;
+			if(com_framework_utils_Input.i.isKeyCodePressed(states_GlobalGameData.blue)) {
+				if(states_GlobalGameData.bluePortal != null) {
+					states_GlobalGameData.bluePortal.die();
 				}
-				var posX = currentProjection.collision.lastX;
-				var posY = currentProjection.collision.lastY;
-				if(com_framework_utils_Input.i.isKeyCodePressed(states_GlobalGameData.blue)) {
-					if(states_GlobalGameData.bluePortal != null) {
-						states_GlobalGameData.bluePortal.die();
-					}
-					this.bluePortal = new gameObjects_BluePortal(posX,posY,this.blueCollision,side);
-					states_GlobalGameData.bluePortal = this.bluePortal;
-					this.addChild(this.bluePortal);
-				} else {
-					if(states_GlobalGameData.orangePortal != null) {
-						states_GlobalGameData.orangePortal.die();
-					}
-					this.orangePortal = new gameObjects_OrangePortal(posX,posY,this.orangeCollision,side);
-					states_GlobalGameData.orangePortal = this.orangePortal;
-					this.addChild(this.orangePortal);
+				this.bluePortal = new gameObjects_BluePortal(posX,posY,this.blueCollision,side);
+				states_GlobalGameData.bluePortal = this.bluePortal;
+				this.addChild(this.bluePortal);
+			} else {
+				if(states_GlobalGameData.orangePortal != null) {
+					states_GlobalGameData.orangePortal.die();
 				}
+				this.orangePortal = new gameObjects_OrangePortal(posX,posY,this.orangeCollision,side);
+				states_GlobalGameData.orangePortal = this.orangePortal;
+				this.addChild(this.orangePortal);
 			}
 		}
 		currentProjection.die();
@@ -20330,7 +20384,7 @@ gameObjects_Chell.prototype = $extend(com_framework_utils_Entity.prototype,{
 		if((states_GlobalGameData.bluePortal.side == 4 || states_GlobalGameData.bluePortal.side == 8) && (states_GlobalGameData.orangePortal.side == 1 || states_GlobalGameData.orangePortal.side == 2) || (states_GlobalGameData.bluePortal.side == 2 || states_GlobalGameData.bluePortal.side == 1) && (states_GlobalGameData.orangePortal.side == 8 || states_GlobalGameData.orangePortal.side == 4)) {
 			this.collision.velocityX = this.collision.lastVelocityY;
 			this.collision.velocityY = this.collision.lastVelocityX;
-			this.collision.accelerationX = this.lastAccelerationY;
+			this.collision.accelerationX = this.collision.lastVelocityY;
 		} else {
 			this.collision.accelerationX = this.lastAccelerationX;
 			this.collision.accelerationY = this.lastAccelerationY;
@@ -20365,7 +20419,7 @@ gameObjects_Chell.prototype = $extend(com_framework_utils_Entity.prototype,{
 		if((states_GlobalGameData.bluePortal.side == 4 || states_GlobalGameData.bluePortal.side == 8) && (states_GlobalGameData.orangePortal.side == 1 || states_GlobalGameData.orangePortal.side == 2) || (states_GlobalGameData.bluePortal.side == 2 || states_GlobalGameData.bluePortal.side == 1) && (states_GlobalGameData.orangePortal.side == 8 || states_GlobalGameData.orangePortal.side == 4)) {
 			this.collision.velocityX = this.collision.lastVelocityY;
 			this.collision.velocityY = this.collision.lastVelocityX;
-			this.collision.accelerationX = this.lastAccelerationY;
+			this.collision.accelerationX = this.collision.lastVelocityY;
 		} else {
 			this.collision.accelerationX = this.lastAccelerationX;
 			this.collision.accelerationY = this.lastAccelerationY;
@@ -20391,7 +20445,7 @@ gameObjects_Chell.prototype = $extend(com_framework_utils_Entity.prototype,{
 		if((states_GlobalGameData.bluePortal.side == 4 || states_GlobalGameData.bluePortal.side == 8) && (states_GlobalGameData.orangePortal.side == 1 || states_GlobalGameData.orangePortal.side == 2) || (states_GlobalGameData.bluePortal.side == 2 || states_GlobalGameData.bluePortal.side == 1) && (states_GlobalGameData.orangePortal.side == 8 || states_GlobalGameData.orangePortal.side == 4)) {
 			this.collision.velocityX = this.collision.lastVelocityY;
 			this.collision.velocityY = this.collision.lastVelocityX;
-			this.collision.accelerationX = this.lastAccelerationY;
+			this.collision.accelerationX = this.collision.lastVelocityY;
 		} else {
 			this.collision.accelerationX = this.lastAccelerationX;
 			this.collision.accelerationY = this.lastAccelerationY;
@@ -20469,7 +20523,11 @@ gameObjects_Chell.prototype = $extend(com_framework_utils_Entity.prototype,{
 		}
 	}
 	,damage: function() {
-		this.life -= 50;
+		this.life -= 200;
+	}
+	,death: function() {
+		this.deadChell = true;
+		this.life -= 500;
 	}
 	,onAxisChange: function(id,value) {
 	}
@@ -20780,7 +20838,7 @@ gameObjects_Projection.prototype = $extend(com_framework_utils_Entity.prototype,
 	}
 	,__class__: gameObjects_Projection
 });
-var gameObjects_Turret = function(x,y,groupCollision) {
+var gameObjects_Turret = function(x,y,dir,groupCollision) {
 	this.death = false;
 	this.facingDir2 = new kha_math_FastVector2(-1,0);
 	this.facingDir = new kha_math_FastVector2(-1,0);
@@ -20798,7 +20856,9 @@ var gameObjects_Turret = function(x,y,groupCollision) {
 	this.display.pivotX = tmp * 0.5;
 	this.display.offsetY = -this.display.height() * 0.5;
 	this.display.offsetX = -this.display.width() * 0.25;
-	this.display.scaleX = this.display.scaleY = 1;
+	this.facingDir.x = dir;
+	this.display.scaleX = -dir;
+	this.display.scaleY = 1;
 	this.collision.x = x;
 	this.collision.y = y;
 	groupCollision.add(this.collision);
@@ -23817,19 +23877,27 @@ js_lib__$ArrayBuffer_ArrayBufferCompat.sliceImpl = function(begin,end) {
 	return resultArray.buffer;
 };
 var kha__$Assets_ImageList = function() {
-	this.names = ["boton1","boton2","cake","chell","cubo","intro","laser","puerta","tilesPortal","torreta"];
+	this.names = ["boton1","boton2","botonLaser","botonPuerta","cake","chell","cubo","intro","laser","portalAzul","portalNaranja","puerta","tilesPortal","torreta"];
 	this.torretaSize = 13112;
 	this.torretaDescription = { name : "torreta", original_height : 180, file_sizes : [13112], original_width : 200, files : ["torreta.png"], type : "image"};
 	this.torretaName = "torreta";
 	this.torreta = null;
-	this.tilesPortalSize = 2789;
-	this.tilesPortalDescription = { name : "tilesPortal", original_height : 416, file_sizes : [2789], original_width : 64, files : ["tilesPortal.png"], type : "image"};
+	this.tilesPortalSize = 3005;
+	this.tilesPortalDescription = { name : "tilesPortal", original_height : 416, file_sizes : [3005], original_width : 64, files : ["tilesPortal.png"], type : "image"};
 	this.tilesPortalName = "tilesPortal";
 	this.tilesPortal = null;
 	this.puertaSize = 3071;
 	this.puertaDescription = { name : "puerta", original_height : 180, file_sizes : [3071], original_width : 200, files : ["puerta.png"], type : "image"};
 	this.puertaName = "puerta";
 	this.puerta = null;
+	this.portalNaranjaSize = 1262;
+	this.portalNaranjaDescription = { name : "portalNaranja", original_height : 45, file_sizes : [1262], original_width : 45, files : ["portalNaranja.png"], type : "image"};
+	this.portalNaranjaName = "portalNaranja";
+	this.portalNaranja = null;
+	this.portalAzulSize = 1713;
+	this.portalAzulDescription = { name : "portalAzul", original_height : 45, file_sizes : [1713], original_width : 45, files : ["portalAzul.png"], type : "image"};
+	this.portalAzulName = "portalAzul";
+	this.portalAzul = null;
 	this.laserSize = 237;
 	this.laserDescription = { name : "laser", original_height : 32, file_sizes : [237], original_width : 32, files : ["laser.png"], type : "image"};
 	this.laserName = "laser";
@@ -23850,6 +23918,14 @@ var kha__$Assets_ImageList = function() {
 	this.cakeDescription = { name : "cake", original_height : 45, file_sizes : [3441], original_width : 45, files : ["cake.png"], type : "image"};
 	this.cakeName = "cake";
 	this.cake = null;
+	this.botonPuertaSize = 298;
+	this.botonPuertaDescription = { name : "botonPuerta", original_height : 32, file_sizes : [298], original_width : 32, files : ["botonPuerta.png"], type : "image"};
+	this.botonPuertaName = "botonPuerta";
+	this.botonPuerta = null;
+	this.botonLaserSize = 237;
+	this.botonLaserDescription = { name : "botonLaser", original_height : 32, file_sizes : [237], original_width : 32, files : ["botonLaser.png"], type : "image"};
+	this.botonLaserName = "botonLaser";
+	this.botonLaser = null;
 	this.boton2Size = 249;
 	this.boton2Description = { name : "boton2", original_height : 32, file_sizes : [249], original_width : 32, files : ["boton2.png"], type : "image"};
 	this.boton2Name = "boton2";
@@ -23890,6 +23966,32 @@ kha__$Assets_ImageList.prototype = {
 	,boton2Unload: function() {
 		this.boton2.unload();
 		this.boton2 = null;
+	}
+	,botonLaser: null
+	,botonLaserName: null
+	,botonLaserDescription: null
+	,botonLaserSize: null
+	,botonLaserLoad: function(done,failure) {
+		kha_Assets.loadImage("botonLaser",function(image) {
+			done();
+		},failure,{ fileName : "kha/internal/AssetsBuilder.hx", lineNumber : 136, className : "kha._Assets.ImageList", methodName : "botonLaserLoad"});
+	}
+	,botonLaserUnload: function() {
+		this.botonLaser.unload();
+		this.botonLaser = null;
+	}
+	,botonPuerta: null
+	,botonPuertaName: null
+	,botonPuertaDescription: null
+	,botonPuertaSize: null
+	,botonPuertaLoad: function(done,failure) {
+		kha_Assets.loadImage("botonPuerta",function(image) {
+			done();
+		},failure,{ fileName : "kha/internal/AssetsBuilder.hx", lineNumber : 136, className : "kha._Assets.ImageList", methodName : "botonPuertaLoad"});
+	}
+	,botonPuertaUnload: function() {
+		this.botonPuerta.unload();
+		this.botonPuerta = null;
 	}
 	,cake: null
 	,cakeName: null
@@ -23956,6 +24058,32 @@ kha__$Assets_ImageList.prototype = {
 		this.laser.unload();
 		this.laser = null;
 	}
+	,portalAzul: null
+	,portalAzulName: null
+	,portalAzulDescription: null
+	,portalAzulSize: null
+	,portalAzulLoad: function(done,failure) {
+		kha_Assets.loadImage("portalAzul",function(image) {
+			done();
+		},failure,{ fileName : "kha/internal/AssetsBuilder.hx", lineNumber : 136, className : "kha._Assets.ImageList", methodName : "portalAzulLoad"});
+	}
+	,portalAzulUnload: function() {
+		this.portalAzul.unload();
+		this.portalAzul = null;
+	}
+	,portalNaranja: null
+	,portalNaranjaName: null
+	,portalNaranjaDescription: null
+	,portalNaranjaSize: null
+	,portalNaranjaLoad: function(done,failure) {
+		kha_Assets.loadImage("portalNaranja",function(image) {
+			done();
+		},failure,{ fileName : "kha/internal/AssetsBuilder.hx", lineNumber : 136, className : "kha._Assets.ImageList", methodName : "portalNaranjaLoad"});
+	}
+	,portalNaranjaUnload: function() {
+		this.portalNaranja.unload();
+		this.portalNaranja = null;
+	}
 	,puerta: null
 	,puertaName: null
 	,puertaDescription: null
@@ -24011,13 +24139,13 @@ kha__$Assets_SoundList.prototype = {
 	,__class__: kha__$Assets_SoundList
 };
 var kha__$Assets_BlobList = function() {
-	this.names = ["boton1_xcf","boton2_xcf","chell_xcf","cubo_xcf","intro_xcf","laser_xcf","puerta_xcf","room1_tmx","roomFinal_tmx","testRoom_tmx","tilesPortal_tsx","tilesPortal_xcf","torreta_xcf"];
+	this.names = ["boton1_xcf","boton2_xcf","botonPuerta_xcf","chell_xcf","cubo_xcf","intro_xcf","laser_xcf","portal_xcf","puerta_xcf","room1_base_tmx","room1_tmx","room2_tmx","room3_tmx","roomFinal_tmx","testRoom_tmx","tilesPortal_tsx","tilesPortal_xcf","torreta_xcf"];
 	this.torreta_xcfSize = 72947;
 	this.torreta_xcfDescription = { name : "torreta_xcf", file_sizes : [72947], files : ["torreta.xcf"], type : "blob"};
 	this.torreta_xcfName = "torreta_xcf";
 	this.torreta_xcf = null;
-	this.tilesPortal_xcfSize = 19783;
-	this.tilesPortal_xcfDescription = { name : "tilesPortal_xcf", file_sizes : [19783], files : ["tilesPortal.xcf"], type : "blob"};
+	this.tilesPortal_xcfSize = 24533;
+	this.tilesPortal_xcfDescription = { name : "tilesPortal_xcf", file_sizes : [24533], files : ["tilesPortal.xcf"], type : "blob"};
 	this.tilesPortal_xcfName = "tilesPortal_xcf";
 	this.tilesPortal_xcf = null;
 	this.tilesPortal_tsxSize = 235;
@@ -24028,18 +24156,34 @@ var kha__$Assets_BlobList = function() {
 	this.testRoom_tmxDescription = { name : "testRoom_tmx", file_sizes : [7075], files : ["testRoom.tmx"], type : "blob"};
 	this.testRoom_tmxName = "testRoom_tmx";
 	this.testRoom_tmx = null;
-	this.roomFinal_tmxSize = 12937;
-	this.roomFinal_tmxDescription = { name : "roomFinal_tmx", file_sizes : [12937], files : ["roomFinal.tmx"], type : "blob"};
+	this.roomFinal_tmxSize = 19255;
+	this.roomFinal_tmxDescription = { name : "roomFinal_tmx", file_sizes : [19255], files : ["roomFinal.tmx"], type : "blob"};
 	this.roomFinal_tmxName = "roomFinal_tmx";
 	this.roomFinal_tmx = null;
-	this.room1_tmxSize = 26400;
-	this.room1_tmxDescription = { name : "room1_tmx", file_sizes : [26400], files : ["room1.tmx"], type : "blob"};
+	this.room3_tmxSize = 32696;
+	this.room3_tmxDescription = { name : "room3_tmx", file_sizes : [32696], files : ["room3.tmx"], type : "blob"};
+	this.room3_tmxName = "room3_tmx";
+	this.room3_tmx = null;
+	this.room2_tmxSize = 34230;
+	this.room2_tmxDescription = { name : "room2_tmx", file_sizes : [34230], files : ["room2.tmx"], type : "blob"};
+	this.room2_tmxName = "room2_tmx";
+	this.room2_tmx = null;
+	this.room1_tmxSize = 33722;
+	this.room1_tmxDescription = { name : "room1_tmx", file_sizes : [33722], files : ["room1.tmx"], type : "blob"};
 	this.room1_tmxName = "room1_tmx";
 	this.room1_tmx = null;
+	this.room1_base_tmxSize = 32742;
+	this.room1_base_tmxDescription = { name : "room1_base_tmx", file_sizes : [32742], files : ["room1 base.tmx"], type : "blob"};
+	this.room1_base_tmxName = "room1_base_tmx";
+	this.room1_base_tmx = null;
 	this.puerta_xcfSize = 64324;
 	this.puerta_xcfDescription = { name : "puerta_xcf", file_sizes : [64324], files : ["puerta.xcf"], type : "blob"};
 	this.puerta_xcfName = "puerta_xcf";
 	this.puerta_xcf = null;
+	this.portal_xcfSize = 6728;
+	this.portal_xcfDescription = { name : "portal_xcf", file_sizes : [6728], files : ["portal.xcf"], type : "blob"};
+	this.portal_xcfName = "portal_xcf";
+	this.portal_xcf = null;
 	this.laser_xcfSize = 2721;
 	this.laser_xcfDescription = { name : "laser_xcf", file_sizes : [2721], files : ["laser.xcf"], type : "blob"};
 	this.laser_xcfName = "laser_xcf";
@@ -24056,6 +24200,10 @@ var kha__$Assets_BlobList = function() {
 	this.chell_xcfDescription = { name : "chell_xcf", file_sizes : [52385], files : ["chell.xcf"], type : "blob"};
 	this.chell_xcfName = "chell_xcf";
 	this.chell_xcf = null;
+	this.botonPuerta_xcfSize = 2647;
+	this.botonPuerta_xcfDescription = { name : "botonPuerta_xcf", file_sizes : [2647], files : ["botonPuerta.xcf"], type : "blob"};
+	this.botonPuerta_xcfName = "botonPuerta_xcf";
+	this.botonPuerta_xcf = null;
 	this.boton2_xcfSize = 2727;
 	this.boton2_xcfDescription = { name : "boton2_xcf", file_sizes : [2727], files : ["boton2.xcf"], type : "blob"};
 	this.boton2_xcfName = "boton2_xcf";
@@ -24096,6 +24244,19 @@ kha__$Assets_BlobList.prototype = {
 	,boton2_xcfUnload: function() {
 		this.boton2_xcf.unload();
 		this.boton2_xcf = null;
+	}
+	,botonPuerta_xcf: null
+	,botonPuerta_xcfName: null
+	,botonPuerta_xcfDescription: null
+	,botonPuerta_xcfSize: null
+	,botonPuerta_xcfLoad: function(done,failure) {
+		kha_Assets.loadBlob("botonPuerta_xcf",function(blob) {
+			done();
+		},failure,{ fileName : "kha/internal/AssetsBuilder.hx", lineNumber : 144, className : "kha._Assets.BlobList", methodName : "botonPuerta_xcfLoad"});
+	}
+	,botonPuerta_xcfUnload: function() {
+		this.botonPuerta_xcf.unload();
+		this.botonPuerta_xcf = null;
 	}
 	,chell_xcf: null
 	,chell_xcfName: null
@@ -24149,6 +24310,19 @@ kha__$Assets_BlobList.prototype = {
 		this.laser_xcf.unload();
 		this.laser_xcf = null;
 	}
+	,portal_xcf: null
+	,portal_xcfName: null
+	,portal_xcfDescription: null
+	,portal_xcfSize: null
+	,portal_xcfLoad: function(done,failure) {
+		kha_Assets.loadBlob("portal_xcf",function(blob) {
+			done();
+		},failure,{ fileName : "kha/internal/AssetsBuilder.hx", lineNumber : 144, className : "kha._Assets.BlobList", methodName : "portal_xcfLoad"});
+	}
+	,portal_xcfUnload: function() {
+		this.portal_xcf.unload();
+		this.portal_xcf = null;
+	}
 	,puerta_xcf: null
 	,puerta_xcfName: null
 	,puerta_xcfDescription: null
@@ -24162,6 +24336,19 @@ kha__$Assets_BlobList.prototype = {
 		this.puerta_xcf.unload();
 		this.puerta_xcf = null;
 	}
+	,room1_base_tmx: null
+	,room1_base_tmxName: null
+	,room1_base_tmxDescription: null
+	,room1_base_tmxSize: null
+	,room1_base_tmxLoad: function(done,failure) {
+		kha_Assets.loadBlob("room1_base_tmx",function(blob) {
+			done();
+		},failure,{ fileName : "kha/internal/AssetsBuilder.hx", lineNumber : 144, className : "kha._Assets.BlobList", methodName : "room1_base_tmxLoad"});
+	}
+	,room1_base_tmxUnload: function() {
+		this.room1_base_tmx.unload();
+		this.room1_base_tmx = null;
+	}
 	,room1_tmx: null
 	,room1_tmxName: null
 	,room1_tmxDescription: null
@@ -24174,6 +24361,32 @@ kha__$Assets_BlobList.prototype = {
 	,room1_tmxUnload: function() {
 		this.room1_tmx.unload();
 		this.room1_tmx = null;
+	}
+	,room2_tmx: null
+	,room2_tmxName: null
+	,room2_tmxDescription: null
+	,room2_tmxSize: null
+	,room2_tmxLoad: function(done,failure) {
+		kha_Assets.loadBlob("room2_tmx",function(blob) {
+			done();
+		},failure,{ fileName : "kha/internal/AssetsBuilder.hx", lineNumber : 144, className : "kha._Assets.BlobList", methodName : "room2_tmxLoad"});
+	}
+	,room2_tmxUnload: function() {
+		this.room2_tmx.unload();
+		this.room2_tmx = null;
+	}
+	,room3_tmx: null
+	,room3_tmxName: null
+	,room3_tmxDescription: null
+	,room3_tmxSize: null
+	,room3_tmxLoad: function(done,failure) {
+		kha_Assets.loadBlob("room3_tmx",function(blob) {
+			done();
+		},failure,{ fileName : "kha/internal/AssetsBuilder.hx", lineNumber : 144, className : "kha._Assets.BlobList", methodName : "room3_tmxLoad"});
+	}
+	,room3_tmxUnload: function() {
+		this.room3_tmx.unload();
+		this.room3_tmx = null;
 	}
 	,roomFinal_tmx: null
 	,roomFinal_tmxName: null
@@ -24244,11 +24457,15 @@ kha__$Assets_BlobList.prototype = {
 	,__class__: kha__$Assets_BlobList
 };
 var kha__$Assets_FontList = function() {
-	this.names = ["Kenney_Thick","mainfont"];
+	this.names = ["Kenney_Thick","Oh_No","mainfont"];
 	this.mainfontSize = 91504;
 	this.mainfontDescription = { name : "mainfont", file_sizes : [91504], files : ["mainfont.ttf"], type : "font"};
 	this.mainfontName = "mainfont";
 	this.mainfont = null;
+	this.Oh_NoSize = 888980;
+	this.Oh_NoDescription = { name : "Oh_No", file_sizes : [888980], files : ["Oh No.ttf"], type : "font"};
+	this.Oh_NoName = "Oh_No";
+	this.Oh_No = null;
 	this.Kenney_ThickSize = 9448;
 	this.Kenney_ThickDescription = { name : "Kenney_Thick", file_sizes : [9448], files : ["Kenney Thick.ttf"], type : "font"};
 	this.Kenney_ThickName = "Kenney_Thick";
@@ -24272,6 +24489,19 @@ kha__$Assets_FontList.prototype = {
 	,Kenney_ThickUnload: function() {
 		this.Kenney_Thick.unload();
 		this.Kenney_Thick = null;
+	}
+	,Oh_No: null
+	,Oh_NoName: null
+	,Oh_NoDescription: null
+	,Oh_NoSize: null
+	,Oh_NoLoad: function(done,failure) {
+		kha_Assets.loadFont("Oh_No",function(font) {
+			done();
+		},failure,{ fileName : "kha/internal/AssetsBuilder.hx", lineNumber : 148, className : "kha._Assets.FontList", methodName : "Oh_NoLoad"});
+	}
+	,Oh_NoUnload: function() {
+		this.Oh_No.unload();
+		this.Oh_No = null;
 	}
 	,mainfont: null
 	,mainfontName: null
@@ -54178,6 +54408,8 @@ states_EndGame.prototype = $extend(com_framework_utils_State.prototype,{
 		atlas.add(new com_loading_basicResources_TilesheetLoader("tilesPortal",32,32,0));
 		atlas.add(new com_loading_basicResources_SpriteSheetLoader("chell",45,60,0,[new com_loading_basicResources_Sequence("fall",[0]),new com_loading_basicResources_Sequence("slide",[1]),new com_loading_basicResources_Sequence("jump",[0]),new com_loading_basicResources_Sequence("run",[2,3,4,5,6,7]),new com_loading_basicResources_Sequence("idle",[10])]));
 		atlas.add(new com_loading_basicResources_ImageLoader("cake"));
+		atlas.add(new com_loading_basicResources_ImageLoader("portalNaranja"));
+		atlas.add(new com_loading_basicResources_ImageLoader("portalAzul"));
 		resources.add(atlas);
 	}
 	,init: function() {
@@ -54196,15 +54428,15 @@ states_EndGame.prototype = $extend(com_framework_utils_State.prototype,{
 		this.text.set_smooth(false);
 		this.stage.addChild(this.text);
 		this.stage.cameras[0].limits(64,0,this.worldMap.widthIntTiles * 32 - 128,this.worldMap.heightInTiles * 32);
+		states_GlobalGameData.camera = this.stage.cameras[0];
 		this.createTouchJoystick();
 	}
 	,createTouchJoystick: function() {
 		this.touchJoystick = new com_framework_utils_VirtualGamepad();
-		this.touchJoystick.addKeyButton(14,37);
-		this.touchJoystick.addKeyButton(15,39);
-		this.touchJoystick.addKeyButton(12,38);
-		this.touchJoystick.addKeyButton(0,32);
-		this.touchJoystick.addKeyButton(2,88);
+		this.touchJoystick.addKeyButton(14,65);
+		this.touchJoystick.addKeyButton(15,68);
+		this.touchJoystick.addKeyButton(12,87);
+		this.touchJoystick.addKeyButton(0,87);
 		this.touchJoystick.notify(($_=this.chell,$bind($_,$_.onAxisChange)),($_=this.chell,$bind($_,$_.onButtonChange)));
 		var gamepad = com_framework_utils_Input.i.getGamepad(0);
 		gamepad.notify(($_=this.chell,$bind($_,$_.onAxisChange)),($_=this.chell,$bind($_,$_.onButtonChange)));
@@ -54281,10 +54513,12 @@ states_GameState.prototype = $extend(com_framework_utils_State.prototype,{
 	,laser: null
 	,cube: null
 	,simulationLayer: null
+	,hudLayer: null
 	,touchJoystick: null
 	,bloqPortalMap: null
 	,room: null
 	,winZone: null
+	,deathZone: null
 	,zone2: null
 	,back: null
 	,turretCollision: null
@@ -54294,6 +54528,7 @@ states_GameState.prototype = $extend(com_framework_utils_State.prototype,{
 	,laserCollision: null
 	,cubeCollision: null
 	,text: null
+	,displayCube: null
 	,load: function(resources) {
 		resources.add(new com_loading_basicResources_DataLoader("room" + this.room + "_tmx"));
 		var atlas = new com_loading_basicResources_JoinAtlas(2048,2048);
@@ -54302,8 +54537,8 @@ states_GameState.prototype = $extend(com_framework_utils_State.prototype,{
 		atlas.add(new com_loading_basicResources_SpriteSheetLoader("chell",45,60,0,[new com_loading_basicResources_Sequence("fall",[0]),new com_loading_basicResources_Sequence("slide",[1]),new com_loading_basicResources_Sequence("jump",[0]),new com_loading_basicResources_Sequence("run",[2,3,4,5,6,7]),new com_loading_basicResources_Sequence("idle",[10])]));
 		atlas.add(new com_loading_basicResources_SpriteSheetLoader("torreta",50,60,0,[new com_loading_basicResources_Sequence("idle",[0]),new com_loading_basicResources_Sequence("open",[1,2]),new com_loading_basicResources_Sequence("falling",[3]),new com_loading_basicResources_Sequence("detect",[0,4]),new com_loading_basicResources_Sequence("fall",[5,6,7]),new com_loading_basicResources_Sequence("death",[8,9,10,11])]));
 		atlas.add(new com_loading_basicResources_SpriteSheetLoader("puerta",50,60,0,[new com_loading_basicResources_Sequence("idle",[0]),new com_loading_basicResources_Sequence("open",[1,2,3,4,5,6,7,8,9]),new com_loading_basicResources_Sequence("close",[8,7,6,5,4,3,2,1,0])]));
-		atlas.add(new com_loading_basicResources_ImageLoader("boton2"));
-		atlas.add(new com_loading_basicResources_ImageLoader("boton1"));
+		atlas.add(new com_loading_basicResources_ImageLoader("botonPuerta"));
+		atlas.add(new com_loading_basicResources_ImageLoader("botonLaser"));
 		atlas.add(new com_loading_basicResources_ImageLoader("laser"));
 		atlas.add(new com_loading_basicResources_SpriteSheetLoader("cubo",45,45,0,[new com_loading_basicResources_Sequence("idle",[0]),new com_loading_basicResources_Sequence("falling",[1])]));
 		resources.add(atlas);
@@ -54312,6 +54547,8 @@ states_GameState.prototype = $extend(com_framework_utils_State.prototype,{
 		this.stageColor(0.5,0.5,0.5);
 		this.simulationLayer = new com_gEngine_display_Layer();
 		this.stage.addChild(this.simulationLayer);
+		this.hudLayer = new com_gEngine_display_StaticLayer();
+		this.stage.addChild(this.hudLayer);
 		this.text = new com_gEngine_display_Text("Kenney_Thick");
 		var tmp = kha_System.windowWidth() * 0.5;
 		this.text.x = tmp - 50;
@@ -54325,7 +54562,15 @@ states_GameState.prototype = $extend(com_framework_utils_State.prototype,{
 		this.worldMap.init($bind(this,this.parseTileLayers),$bind(this,this.parseMapObjects));
 		states_GlobalGameData.worldMap = this.worldMap;
 		states_GlobalGameData.bloqPortalMap = this.bloqPortalMap;
-		this.stage.cameras[0].limits(64,0,this.worldMap.widthIntTiles * 32 - 128,this.worldMap.heightInTiles * 32);
+		this.displayCube = new com_gEngine_display_Sprite("cubo");
+		this.displayCube.set_smooth(false);
+		this.displayCube.x = 20;
+		this.displayCube.y = 20;
+		this.displayCube.timeline.playAnimation("idle",false);
+		this.displayCube.scaleX = this.displayCube.scaleY = 0.75;
+		this.hudLayer.addChild(this.displayCube);
+		this.hudLayer.visible = false;
+		this.stage.cameras[0].limits(64,0,this.worldMap.widthIntTiles * 32 - 128,this.worldMap.heightInTiles * 32 - 16);
 		states_GlobalGameData.camera = this.stage.cameras[0];
 		this.createTouchJoystick();
 	}
@@ -54364,6 +54609,12 @@ states_GameState.prototype = $extend(com_framework_utils_State.prototype,{
 			this.winZone.y = object.y;
 			this.winZone.width = object.width;
 			this.winZone.height = object.height;
+		} else if(object.name.toLowerCase() == "deathZone".toLowerCase()) {
+			this.deathZone = new com_collision_platformer_CollisionBox();
+			this.deathZone.x = object.x;
+			this.deathZone.y = object.y;
+			this.deathZone.width = object.width;
+			this.deathZone.height = object.height;
 		} else if(object.name.toLowerCase() == "zone2".toLowerCase()) {
 			this.zone2 = new com_collision_platformer_CollisionBox();
 			this.zone2.x = object.x;
@@ -54377,19 +54628,23 @@ states_GameState.prototype = $extend(com_framework_utils_State.prototype,{
 			this.back.width = object.width;
 			this.back.height = object.height;
 			this.back.staticObject = false;
-		} else if(object.name.toLowerCase() == "enemyZone".toLowerCase()) {
-			this.turret = new gameObjects_Turret(object.x,object.y,this.turretCollision);
+		} else if(object.name.toLowerCase() == "enemyZoneDer".toLowerCase()) {
+			this.turret = new gameObjects_Turret(object.x,object.y,1,this.turretCollision);
+			this.addChild(this.turret);
+		}
+		if(object.name.toLowerCase() == "enemyZoneIzq".toLowerCase()) {
+			this.turret = new gameObjects_Turret(object.x,object.y,-1,this.turretCollision);
 			this.addChild(this.turret);
 		}
 		if(object.name.toLowerCase() == "puerta".toLowerCase()) {
 			this.gateway = new gameObjects_Gateway(object.x + 2,object.y - 2 * object.height + 1,this.gatewayCollision);
 			this.addChild(this.gateway);
 		}
-		if(object.name.toLowerCase() == "boton2".toLowerCase()) {
+		if(object.name.toLowerCase() == "botonPuerta".toLowerCase()) {
 			this.buttonGateway = new gameObjects_ButtonGateway(object.x,object.y - object.height + 1,this.buttonGatewayCollision,this.gateway);
 			this.addChild(this.buttonGateway);
 		}
-		if(object.name.toLowerCase() == "boton1".toLowerCase()) {
+		if(object.name.toLowerCase() == "botonLaser".toLowerCase()) {
 			this.buttonLaser = new gameObjects_ButtonLaser(object.x,object.y - object.height + 1,this.buttonLaserCollision,this.laser);
 			this.addChild(this.buttonLaser);
 		}
@@ -54407,9 +54662,12 @@ states_GameState.prototype = $extend(com_framework_utils_State.prototype,{
 	}
 	,update: function(dt) {
 		com_framework_utils_State.prototype.update.call(this,dt);
-		this.text.set_text(Std.string(this.chell.getVida()));
+		this.text.set_text(Std.string(this.chell.collision.accelerationX) + " " + Std.string(this.chell.collision.accelerationY) + " - " + Std.string(Math.round(this.chell.collision.velocityX)) + " " + Std.string(Math.round(this.chell.collision.velocityY)));
 		if(this.chell.getVida() <= 0) {
 			this.changeState(new states_LoseGame());
+		}
+		if(this.chell.getCube) {
+			this.hudLayer.visible = true;
 		}
 		com_collision_platformer_CollisionEngine.collide(this.chell.collision,this.worldMap.collision);
 		com_collision_platformer_CollisionEngine.collide(this.turretCollision,this.worldMap.collision);
@@ -54419,9 +54677,13 @@ states_GameState.prototype = $extend(com_framework_utils_State.prototype,{
 				this.changeState(new states_EndGame());
 			} else {
 				var nuevaRoomInt = this.room;
+				++nuevaRoomInt;
 				var nuevaRoom = nuevaRoomInt;
 				this.changeState(new states_GameState(nuevaRoom,this.room));
 			}
+		}
+		if(com_collision_platformer_CollisionEngine.overlap(this.chell.collision,this.deathZone)) {
+			this.chell.death();
 		}
 		if(com_collision_platformer_CollisionEngine.overlap(this.chell.collision,this.zone2)) {
 			this.stage.cameras[0].setTarget(this.zone2.x + kha_System.windowWidth() * 0.5,this.zone2.y);
@@ -54458,6 +54720,7 @@ states_GameState.prototype = $extend(com_framework_utils_State.prototype,{
 			displayCube.scaleX = displayCube.scaleY = 1;
 			states_GlobalGameData.simulationLayer.addChild(displayCube);
 			states_GlobalGameData.chell.getCube = false;
+			this.hudLayer.visible = false;
 			currentButton.gateway.openGateway();
 			currentButton.destroy();
 		}
@@ -54968,7 +55231,7 @@ kha_netsync_Session.RPC_SERVER = 0;
 kha_netsync_Session.RPC_ALL = 1;
 kha_netsync_SyncBuilder.nextId = 0;
 kha_netsync_SyncBuilder.objects = [];
-states_GlobalGameData.roomFinal = "1";
+states_GlobalGameData.roomFinal = "2";
 states_GlobalGameData.blue = 81;
 states_GlobalGameData.orange = 69;
 states_GlobalGameData.action = 82;
