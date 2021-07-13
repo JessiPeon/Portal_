@@ -55,6 +55,7 @@ class GameState extends State {
 	var touchJoystick:VirtualGamepad;
 	//var tray:helpers.Tray;
 	//var mayonnaiseMap:TileMapDisplay;
+	var bloqPortalMap:TileMapDisplay;
 	var room:String;
 	var winZone:CollisionBox;
 	var zone2:CollisionBox;
@@ -136,8 +137,8 @@ class GameState extends State {
 		worldMap = new Tilemap("room"+room+"_tmx");
 		worldMap.init(parseTileLayers, parseMapObjects);
 		GlobalGameData.worldMap = worldMap;
+		GlobalGameData.bloqPortalMap = bloqPortalMap;
 		//tray = new Tray(mayonnaiseMap);
-	
 
 		stage.defaultCamera().limits(32*2, 0, worldMap.widthIntTiles * 32 - 4*32, worldMap.heightInTiles * 32 );
 		GlobalGameData.camera = stage.defaultCamera();
@@ -158,12 +159,19 @@ class GameState extends State {
 	}
 
 	function parseTileLayers(layerTilemap:Tilemap, tileLayer:TmxTileLayer) {
-		if (!tileLayer.properties.exists("noCollision")) {
-			layerTilemap.createCollisions(tileLayer);
-		}
-		simulationLayer.addChild(layerTilemap.createDisplay(tileLayer,new Sprite("tilesPortal")));
+
 		// mayonnaiseMap = layerTilemap.createDisplay(tileLayer);
 		//simulationLayer.addChild(mayonnaiseMap);
+		if (tileLayer.properties.exists("noPortal")){
+			layerTilemap.createCollisions(tileLayer);
+			bloqPortalMap=layerTilemap.createDisplay(tileLayer,new Sprite("tilesPortal"));
+			simulationLayer.addChild(bloqPortalMap);
+		} else {
+			if (!tileLayer.properties.exists("noCollision")) {
+				layerTilemap.createCollisions(tileLayer);
+			}
+			simulationLayer.addChild(layerTilemap.createDisplay(tileLayer,new Sprite("tilesPortal")));
+		}
 	}
 
 	function parseMapObjects(layerTilemap:Tilemap, object:TmxObject) {
@@ -259,6 +267,12 @@ class GameState extends State {
 			chell.getCube = false;
 			CollisionEngine.collide(chell.collision,back);
 			back.staticObject=true;
+			if (GlobalGameData.bluePortal != null){
+				GlobalGameData.bluePortal.die();
+			}
+			if (GlobalGameData.orangePortal != null){
+				GlobalGameData.orangePortal.die();
+			}
 		}
 		
 		CollisionEngine.overlap(chell.collision,turretCollision,chellVsTurret);

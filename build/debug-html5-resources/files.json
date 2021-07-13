@@ -1533,7 +1533,7 @@
 				"room1.tmx"
 			],
 			"file_sizes": [
-				20272
+				26400
 			],
 			"type": "blob"
 		},
@@ -2221,7 +2221,7 @@
 				"tilesPortal.png"
 			],
 			"file_sizes": [
-				2767
+				2789
 			],
 			"type": "image",
 			"original_width": 64,
@@ -2243,7 +2243,7 @@
 				"tilesPortal.xcf"
 			],
 			"file_sizes": [
-				17776
+				19783
 			],
 			"type": "blob"
 		},

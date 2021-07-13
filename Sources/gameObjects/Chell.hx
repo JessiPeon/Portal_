@@ -105,44 +105,48 @@ class Chell extends Entity {
 
 	function portalOnWall(worldC:ICollider,projectionsC:ICollider){
 		var currentProjection:Projection = cast projectionsC.userData;
-		if (Input.i.isKeyCodePressed(GlobalGameData.orange) || Input.i.isKeyCodePressed(GlobalGameData.blue)){
-			var side:Int = 99;
-			
-			if (currentProjection.collision.isTouching(Sides.BOTTOM)) {
-				side = Sides.BOTTOM;
-			} else
-			if (currentProjection.collision.isTouching(Sides.TOP)) {
-				side = Sides.TOP;
-			} else
-			if (currentProjection.collision.isTouching(Sides.LEFT)) {
-				side = Sides.LEFT;
-			} else
-			if (currentProjection.collision.isTouching(Sides.RIGHT)) {
-				side = Sides.RIGHT;
-			} 
-
-			
-			var posX:Float = currentProjection.collision.lastX;
-			var posY:Float = currentProjection.collision.lastY;
-			if (Input.i.isKeyCodePressed(GlobalGameData.blue)){
-				if (GlobalGameData.bluePortal != null){
-					GlobalGameData.bluePortal.die();
+		var x:Int = Std.int( (currentProjection.collision.x + currentProjection.collision.width / 2) / 32) ;
+		var y:Int = Std.int( (currentProjection.collision.y + currentProjection.collision.height + 1) / 32);
+		var type:Int = GlobalGameData.bloqPortalMap.getTile(x, y);
+		if (type == 0){
+			if (Input.i.isKeyCodePressed(GlobalGameData.orange) || Input.i.isKeyCodePressed(GlobalGameData.blue)){
+				var side:Int = 99;
+				
+				if (currentProjection.collision.isTouching(Sides.BOTTOM)) {
+					side = Sides.BOTTOM;
+				} else
+				if (currentProjection.collision.isTouching(Sides.TOP)) {
+					side = Sides.TOP;
+				} else
+				if (currentProjection.collision.isTouching(Sides.LEFT)) {
+					side = Sides.LEFT;
+				} else
+				if (currentProjection.collision.isTouching(Sides.RIGHT)) {
+					side = Sides.RIGHT;
+				} 
+	
+				
+				var posX:Float = currentProjection.collision.lastX;
+				var posY:Float = currentProjection.collision.lastY;
+				if (Input.i.isKeyCodePressed(GlobalGameData.blue)){
+					if (GlobalGameData.bluePortal != null){
+						GlobalGameData.bluePortal.die();
+					}
+					bluePortal = new BluePortal(posX, posY,blueCollision,side);
+					GlobalGameData.bluePortal = bluePortal;
+					addChild(bluePortal);
+				} else {
+					if (GlobalGameData.orangePortal != null){
+						GlobalGameData.orangePortal.die();
+					}
+					orangePortal = new OrangePortal(posX, posY,orangeCollision,side);
+					GlobalGameData.orangePortal = orangePortal;
+					addChild(orangePortal);
 				}
-				bluePortal = new BluePortal(posX, posY,blueCollision,side);
-				GlobalGameData.bluePortal = bluePortal;
-				addChild(bluePortal);
-			} else {
-				if (GlobalGameData.orangePortal != null){
-					GlobalGameData.orangePortal.die();
-				}
-				orangePortal = new OrangePortal(posX, posY,orangeCollision,side);
-				GlobalGameData.orangePortal = orangePortal;
-				addChild(orangePortal);
+				
 			}
-			
-
-			
 		}
+		
 		currentProjection.die();
 	}
 
@@ -155,16 +159,17 @@ class Chell extends Entity {
 		} else
 		if(GlobalGameData.bluePortal.side == Sides.RIGHT){
 			posXFin = posXFin - 55;
+		} else
+		if(GlobalGameData.bluePortal.side == Sides.TOP){
+			posYFin = posYFin +15;
+		} else
+		if(GlobalGameData.bluePortal.side == Sides.BOTTOM){
+			posYFin = posYFin -50;
 		} 
 		changePosition(posXFin,posYFin);
-		collision.velocityX = collision.lastVelocityX;
-		collision.velocityY = collision.lastVelocityY;
-		if(GlobalGameData.orangePortal.side == GlobalGameData.bluePortal.side){
-			collision.velocityX = collision.velocityX * (-1);
-			facingDir.x = facingDir.x * (-1);
-			display.scaleX = display.scaleX*(-1);
-		}
-		//collision.accelerationX = 0;
+		changeDirection();
+
+		
 		
 	}
 
@@ -176,24 +181,48 @@ class Chell extends Entity {
 		} else
 		if(GlobalGameData.orangePortal.side == Sides.RIGHT){
 			posXFin = posXFin - 55;
+		} else
+		if(GlobalGameData.orangePortal.side == Sides.TOP){
+			posYFin = posYFin + 15;
+		} 
+		else
+		if(GlobalGameData.orangePortal.side == Sides.BOTTOM){
+			posYFin = posYFin -50;
 		} 
 		changePosition(posXFin,posYFin);
-		collision.velocityX = collision.lastVelocityX;
-		collision.velocityY = collision.lastVelocityY;
-		collision.accelerationX = lastAccelerationX;
-		collision.accelerationY = lastAccelerationY;
-		if(GlobalGameData.orangePortal.side == GlobalGameData.bluePortal.side){
-			collision.velocityX = collision.velocityX * (-1);
-			facingDir.x = facingDir.x * (-1);
-			display.scaleX = display.scaleX*(-1);
-		}
-		//collision.accelerationX = 0;
+		changeDirection();
 		
 	}
 
 	inline function changePosition(posXFin:Float,posYFin:Float) {
 		collision.x=posXFin;
 		collision.y=posYFin;
+	}
+
+	inline function changeDirection(){
+		if ((((GlobalGameData.bluePortal.side == Sides.TOP) || (GlobalGameData.bluePortal.side == Sides.BOTTOM)) && ((GlobalGameData.orangePortal.side == Sides.LEFT)||(GlobalGameData.orangePortal.side == Sides.RIGHT) ) ) || 
+			(((GlobalGameData.bluePortal.side == Sides.RIGHT) || (GlobalGameData.bluePortal.side == Sides.LEFT)) && ((GlobalGameData.orangePortal.side == Sides.BOTTOM)||(GlobalGameData.orangePortal.side == Sides.TOP))  )){
+			collision.velocityX = collision.lastVelocityY;
+			collision.velocityY = collision.lastVelocityX;
+			collision.accelerationX = lastAccelerationY;
+			//collision.accelerationY = lastAccelerationX;
+		} else {
+			collision.accelerationX = lastAccelerationX;
+			collision.accelerationY = lastAccelerationY;
+			collision.velocityX = collision.lastVelocityX;
+			collision.velocityY = collision.lastVelocityY;
+		}
+		
+		if(GlobalGameData.orangePortal.side == GlobalGameData.bluePortal.side){
+			if ((GlobalGameData.bluePortal.side == Sides.TOP) || (GlobalGameData.bluePortal.side == Sides.BOTTOM)){
+				collision.velocityY = collision.velocityY * (-1);
+				facingDir.y = facingDir.y * (-1);
+			} else {
+				collision.velocityX = collision.velocityX * (-1);
+				facingDir.x = facingDir.x * (-1);
+				display.scaleX = display.scaleX*(-1);
+			}
+		}
 	}
 
 	function deleteProyection(gatewayC:ICollider,projectionsC:ICollider){

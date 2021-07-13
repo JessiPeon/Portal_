@@ -20277,33 +20277,38 @@ gameObjects_Chell.prototype = $extend(com_framework_utils_Entity.prototype,{
 	}
 	,portalOnWall: function(worldC,projectionsC) {
 		var currentProjection = projectionsC.userData;
-		if(com_framework_utils_Input.i.isKeyCodePressed(states_GlobalGameData.orange) || com_framework_utils_Input.i.isKeyCodePressed(states_GlobalGameData.blue)) {
-			var side = 99;
-			if(currentProjection.collision.isTouching(8)) {
-				side = 8;
-			} else if(currentProjection.collision.isTouching(4)) {
-				side = 4;
-			} else if(currentProjection.collision.isTouching(1)) {
-				side = 1;
-			} else if(currentProjection.collision.isTouching(2)) {
-				side = 2;
-			}
-			var posX = currentProjection.collision.lastX;
-			var posY = currentProjection.collision.lastY;
-			if(com_framework_utils_Input.i.isKeyCodePressed(states_GlobalGameData.blue)) {
-				if(states_GlobalGameData.bluePortal != null) {
-					states_GlobalGameData.bluePortal.die();
+		var x = (currentProjection.collision.x + currentProjection.collision.width / 2) / 32 | 0;
+		var y = (currentProjection.collision.y + currentProjection.collision.height + 1) / 32 | 0;
+		var type = states_GlobalGameData.bloqPortalMap.getTile(x,y);
+		if(type == 0) {
+			if(com_framework_utils_Input.i.isKeyCodePressed(states_GlobalGameData.orange) || com_framework_utils_Input.i.isKeyCodePressed(states_GlobalGameData.blue)) {
+				var side = 99;
+				if(currentProjection.collision.isTouching(8)) {
+					side = 8;
+				} else if(currentProjection.collision.isTouching(4)) {
+					side = 4;
+				} else if(currentProjection.collision.isTouching(1)) {
+					side = 1;
+				} else if(currentProjection.collision.isTouching(2)) {
+					side = 2;
 				}
-				this.bluePortal = new gameObjects_BluePortal(posX,posY,this.blueCollision,side);
-				states_GlobalGameData.bluePortal = this.bluePortal;
-				this.addChild(this.bluePortal);
-			} else {
-				if(states_GlobalGameData.orangePortal != null) {
-					states_GlobalGameData.orangePortal.die();
+				var posX = currentProjection.collision.lastX;
+				var posY = currentProjection.collision.lastY;
+				if(com_framework_utils_Input.i.isKeyCodePressed(states_GlobalGameData.blue)) {
+					if(states_GlobalGameData.bluePortal != null) {
+						states_GlobalGameData.bluePortal.die();
+					}
+					this.bluePortal = new gameObjects_BluePortal(posX,posY,this.blueCollision,side);
+					states_GlobalGameData.bluePortal = this.bluePortal;
+					this.addChild(this.bluePortal);
+				} else {
+					if(states_GlobalGameData.orangePortal != null) {
+						states_GlobalGameData.orangePortal.die();
+					}
+					this.orangePortal = new gameObjects_OrangePortal(posX,posY,this.orangeCollision,side);
+					states_GlobalGameData.orangePortal = this.orangePortal;
+					this.addChild(this.orangePortal);
 				}
-				this.orangePortal = new gameObjects_OrangePortal(posX,posY,this.orangeCollision,side);
-				states_GlobalGameData.orangePortal = this.orangePortal;
-				this.addChild(this.orangePortal);
 			}
 		}
 		currentProjection.die();
@@ -20315,15 +20320,32 @@ gameObjects_Chell.prototype = $extend(com_framework_utils_Entity.prototype,{
 			posXFin += 20;
 		} else if(states_GlobalGameData.bluePortal.side == 2) {
 			posXFin -= 55;
+		} else if(states_GlobalGameData.bluePortal.side == 4) {
+			posYFin += 15;
+		} else if(states_GlobalGameData.bluePortal.side == 8) {
+			posYFin -= 50;
 		}
 		this.collision.x = posXFin;
 		this.collision.y = posYFin;
-		this.collision.velocityX = this.collision.lastVelocityX;
-		this.collision.velocityY = this.collision.lastVelocityY;
+		if((states_GlobalGameData.bluePortal.side == 4 || states_GlobalGameData.bluePortal.side == 8) && (states_GlobalGameData.orangePortal.side == 1 || states_GlobalGameData.orangePortal.side == 2) || (states_GlobalGameData.bluePortal.side == 2 || states_GlobalGameData.bluePortal.side == 1) && (states_GlobalGameData.orangePortal.side == 8 || states_GlobalGameData.orangePortal.side == 4)) {
+			this.collision.velocityX = this.collision.lastVelocityY;
+			this.collision.velocityY = this.collision.lastVelocityX;
+			this.collision.accelerationX = this.lastAccelerationY;
+		} else {
+			this.collision.accelerationX = this.lastAccelerationX;
+			this.collision.accelerationY = this.lastAccelerationY;
+			this.collision.velocityX = this.collision.lastVelocityX;
+			this.collision.velocityY = this.collision.lastVelocityY;
+		}
 		if(states_GlobalGameData.orangePortal.side == states_GlobalGameData.bluePortal.side) {
-			this.collision.velocityX *= -1;
-			this.facingDir.x *= -1;
-			this.display.scaleX *= -1;
+			if(states_GlobalGameData.bluePortal.side == 4 || states_GlobalGameData.bluePortal.side == 8) {
+				this.collision.velocityY *= -1;
+				this.facingDir.y *= -1;
+			} else {
+				this.collision.velocityX *= -1;
+				this.facingDir.x *= -1;
+				this.display.scaleX *= -1;
+			}
 		}
 	}
 	,chellVsBluePortal: function(chellC,bluePortalC) {
@@ -20333,22 +20355,59 @@ gameObjects_Chell.prototype = $extend(com_framework_utils_Entity.prototype,{
 			posXFin += 20;
 		} else if(states_GlobalGameData.orangePortal.side == 2) {
 			posXFin -= 55;
+		} else if(states_GlobalGameData.orangePortal.side == 4) {
+			posYFin += 15;
+		} else if(states_GlobalGameData.orangePortal.side == 8) {
+			posYFin -= 50;
 		}
 		this.collision.x = posXFin;
 		this.collision.y = posYFin;
-		this.collision.velocityX = this.collision.lastVelocityX;
-		this.collision.velocityY = this.collision.lastVelocityY;
-		this.collision.accelerationX = this.lastAccelerationX;
-		this.collision.accelerationY = this.lastAccelerationY;
+		if((states_GlobalGameData.bluePortal.side == 4 || states_GlobalGameData.bluePortal.side == 8) && (states_GlobalGameData.orangePortal.side == 1 || states_GlobalGameData.orangePortal.side == 2) || (states_GlobalGameData.bluePortal.side == 2 || states_GlobalGameData.bluePortal.side == 1) && (states_GlobalGameData.orangePortal.side == 8 || states_GlobalGameData.orangePortal.side == 4)) {
+			this.collision.velocityX = this.collision.lastVelocityY;
+			this.collision.velocityY = this.collision.lastVelocityX;
+			this.collision.accelerationX = this.lastAccelerationY;
+		} else {
+			this.collision.accelerationX = this.lastAccelerationX;
+			this.collision.accelerationY = this.lastAccelerationY;
+			this.collision.velocityX = this.collision.lastVelocityX;
+			this.collision.velocityY = this.collision.lastVelocityY;
+		}
 		if(states_GlobalGameData.orangePortal.side == states_GlobalGameData.bluePortal.side) {
-			this.collision.velocityX *= -1;
-			this.facingDir.x *= -1;
-			this.display.scaleX *= -1;
+			if(states_GlobalGameData.bluePortal.side == 4 || states_GlobalGameData.bluePortal.side == 8) {
+				this.collision.velocityY *= -1;
+				this.facingDir.y *= -1;
+			} else {
+				this.collision.velocityX *= -1;
+				this.facingDir.x *= -1;
+				this.display.scaleX *= -1;
+			}
 		}
 	}
 	,changePosition: function(posXFin,posYFin) {
 		this.collision.x = posXFin;
 		this.collision.y = posYFin;
+	}
+	,changeDirection: function() {
+		if((states_GlobalGameData.bluePortal.side == 4 || states_GlobalGameData.bluePortal.side == 8) && (states_GlobalGameData.orangePortal.side == 1 || states_GlobalGameData.orangePortal.side == 2) || (states_GlobalGameData.bluePortal.side == 2 || states_GlobalGameData.bluePortal.side == 1) && (states_GlobalGameData.orangePortal.side == 8 || states_GlobalGameData.orangePortal.side == 4)) {
+			this.collision.velocityX = this.collision.lastVelocityY;
+			this.collision.velocityY = this.collision.lastVelocityX;
+			this.collision.accelerationX = this.lastAccelerationY;
+		} else {
+			this.collision.accelerationX = this.lastAccelerationX;
+			this.collision.accelerationY = this.lastAccelerationY;
+			this.collision.velocityX = this.collision.lastVelocityX;
+			this.collision.velocityY = this.collision.lastVelocityY;
+		}
+		if(states_GlobalGameData.orangePortal.side == states_GlobalGameData.bluePortal.side) {
+			if(states_GlobalGameData.bluePortal.side == 4 || states_GlobalGameData.bluePortal.side == 8) {
+				this.collision.velocityY *= -1;
+				this.facingDir.y *= -1;
+			} else {
+				this.collision.velocityX *= -1;
+				this.facingDir.x *= -1;
+				this.display.scaleX *= -1;
+			}
+		}
 	}
 	,deleteProyection: function(gatewayC,projectionsC) {
 		var currentProjection = projectionsC.userData;
@@ -23763,8 +23822,8 @@ var kha__$Assets_ImageList = function() {
 	this.torretaDescription = { name : "torreta", original_height : 180, file_sizes : [13112], original_width : 200, files : ["torreta.png"], type : "image"};
 	this.torretaName = "torreta";
 	this.torreta = null;
-	this.tilesPortalSize = 2767;
-	this.tilesPortalDescription = { name : "tilesPortal", original_height : 416, file_sizes : [2767], original_width : 64, files : ["tilesPortal.png"], type : "image"};
+	this.tilesPortalSize = 2789;
+	this.tilesPortalDescription = { name : "tilesPortal", original_height : 416, file_sizes : [2789], original_width : 64, files : ["tilesPortal.png"], type : "image"};
 	this.tilesPortalName = "tilesPortal";
 	this.tilesPortal = null;
 	this.puertaSize = 3071;
@@ -23957,8 +24016,8 @@ var kha__$Assets_BlobList = function() {
 	this.torreta_xcfDescription = { name : "torreta_xcf", file_sizes : [72947], files : ["torreta.xcf"], type : "blob"};
 	this.torreta_xcfName = "torreta_xcf";
 	this.torreta_xcf = null;
-	this.tilesPortal_xcfSize = 17776;
-	this.tilesPortal_xcfDescription = { name : "tilesPortal_xcf", file_sizes : [17776], files : ["tilesPortal.xcf"], type : "blob"};
+	this.tilesPortal_xcfSize = 19783;
+	this.tilesPortal_xcfDescription = { name : "tilesPortal_xcf", file_sizes : [19783], files : ["tilesPortal.xcf"], type : "blob"};
 	this.tilesPortal_xcfName = "tilesPortal_xcf";
 	this.tilesPortal_xcf = null;
 	this.tilesPortal_tsxSize = 235;
@@ -23973,8 +24032,8 @@ var kha__$Assets_BlobList = function() {
 	this.roomFinal_tmxDescription = { name : "roomFinal_tmx", file_sizes : [12937], files : ["roomFinal.tmx"], type : "blob"};
 	this.roomFinal_tmxName = "roomFinal_tmx";
 	this.roomFinal_tmx = null;
-	this.room1_tmxSize = 20272;
-	this.room1_tmxDescription = { name : "room1_tmx", file_sizes : [20272], files : ["room1.tmx"], type : "blob"};
+	this.room1_tmxSize = 26400;
+	this.room1_tmxDescription = { name : "room1_tmx", file_sizes : [26400], files : ["room1.tmx"], type : "blob"};
 	this.room1_tmxName = "room1_tmx";
 	this.room1_tmx = null;
 	this.puerta_xcfSize = 64324;
@@ -54223,6 +54282,7 @@ states_GameState.prototype = $extend(com_framework_utils_State.prototype,{
 	,cube: null
 	,simulationLayer: null
 	,touchJoystick: null
+	,bloqPortalMap: null
 	,room: null
 	,winZone: null
 	,zone2: null
@@ -54264,6 +54324,7 @@ states_GameState.prototype = $extend(com_framework_utils_State.prototype,{
 		this.worldMap = new com_collision_platformer_Tilemap("room" + this.room + "_tmx");
 		this.worldMap.init($bind(this,this.parseTileLayers),$bind(this,this.parseMapObjects));
 		states_GlobalGameData.worldMap = this.worldMap;
+		states_GlobalGameData.bloqPortalMap = this.bloqPortalMap;
 		this.stage.cameras[0].limits(64,0,this.worldMap.widthIntTiles * 32 - 128,this.worldMap.heightInTiles * 32);
 		states_GlobalGameData.camera = this.stage.cameras[0];
 		this.createTouchJoystick();
@@ -54279,10 +54340,16 @@ states_GameState.prototype = $extend(com_framework_utils_State.prototype,{
 		gamepad.notify(($_=this.chell,$bind($_,$_.onAxisChange)),($_=this.chell,$bind($_,$_.onButtonChange)));
 	}
 	,parseTileLayers: function(layerTilemap,tileLayer) {
-		if(!tileLayer.properties.exists("noCollision")) {
+		if(tileLayer.properties.exists("noPortal")) {
 			layerTilemap.createCollisions(tileLayer);
+			this.bloqPortalMap = layerTilemap.createDisplay(tileLayer,new com_gEngine_display_Sprite("tilesPortal"));
+			this.simulationLayer.addChild(this.bloqPortalMap);
+		} else {
+			if(!tileLayer.properties.exists("noCollision")) {
+				layerTilemap.createCollisions(tileLayer);
+			}
+			this.simulationLayer.addChild(layerTilemap.createDisplay(tileLayer,new com_gEngine_display_Sprite("tilesPortal")));
 		}
-		this.simulationLayer.addChild(layerTilemap.createDisplay(tileLayer,new com_gEngine_display_Sprite("tilesPortal")));
 	}
 	,parseMapObjects: function(layerTilemap,object) {
 		if(object.name.toLowerCase() == "playerPosition".toLowerCase()) {
@@ -54362,6 +54429,12 @@ states_GameState.prototype = $extend(com_framework_utils_State.prototype,{
 			this.chell.getCube = false;
 			com_collision_platformer_CollisionEngine.collide(this.chell.collision,this.back);
 			this.back.staticObject = true;
+			if(states_GlobalGameData.bluePortal != null) {
+				states_GlobalGameData.bluePortal.die();
+			}
+			if(states_GlobalGameData.orangePortal != null) {
+				states_GlobalGameData.orangePortal.die();
+			}
 		}
 		com_collision_platformer_CollisionEngine.overlap(this.chell.collision,this.turretCollision,$bind(this,this.chellVsTurret));
 		com_collision_platformer_CollisionEngine.overlap(this.chell.collision,this.buttonGatewayCollision,$bind(this,this.chellVsButtonGateway));

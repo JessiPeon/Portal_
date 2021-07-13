@@ -1,5 +1,6 @@
 package states;
 
+import com.gEngine.display.extra.TileMapDisplay;
 import com.gEngine.display.Camera;
 import com.collision.platformer.CollisionGroup;
 import kha.input.KeyCode;
@@ -21,6 +22,7 @@ class GlobalGameData {
 	static public var orange:KeyCode = KeyCode.E; 
 	static public var action:KeyCode = KeyCode.R;
 	static public var camera:Camera;
+	static public var bloqPortalMap:TileMapDisplay;
     //static public var screenWidth:Int = 1280;
     //static public var screenHeight:Int = 720;
 
