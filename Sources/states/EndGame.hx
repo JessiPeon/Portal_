@@ -37,7 +37,7 @@ class EndGame extends State {
 	var creditsZone:CollisionBox;
 	var text:Text;
 	var cake:Sprite;
-	var touchJoystick:VirtualGamepad; //temp
+	var touchJoystick:VirtualGamepad;
 	var soundOn:Bool = true;
 
 	override function load(resources:Resources) {
@@ -56,7 +56,6 @@ class EndGame extends State {
 		atlas.add(new ImageLoader("cake"));
 		atlas.add(new ImageLoader("portalNaranja"));
 		atlas.add(new ImageLoader("portalAzul"));
-		//atlas.add(new SpriteSheetLoader("cake", 45, 45, 0,[new Sequence("idle", [0])]) );
 		resources.add(atlas);
 		resources.add(new SoundLoader("orangePortal"));
 		resources.add(new SoundLoader("bluePortal"));
@@ -83,7 +82,6 @@ class EndGame extends State {
 		stage.defaultCamera().limits(32*2, 0, worldMap.widthIntTiles * 32 - 4*32, worldMap.heightInTiles * 32 );
 		GlobalGameData.camera = stage.defaultCamera();
 		SM.stopMusic();
-		//temporal hasta poner camino
 		createTouchJoystick();
 	}
 
@@ -106,8 +104,7 @@ class EndGame extends State {
 			layerTilemap.createCollisions(tileLayer);
 		}
 		simulationLayer.addChild(layerTilemap.createDisplay(tileLayer,new Sprite("tilesPortal")));
-		// mayonnaiseMap = layerTilemap.createDisplay(tileLayer);
-		//simulationLayer.addChild(mayonnaiseMap);
+
 	}
 
 	function parseMapObjects(layerTilemap:Tilemap, object:TmxObject) {
@@ -144,7 +141,6 @@ class EndGame extends State {
 		if(CollisionEngine.overlap(chell.collision,creditsZone)){
 			cake.visible = false;
 			text.text="The Cake is a Lie";
-			//soundOn = true;
 			if (soundOn){
 				SM.playMusic("StillAlive");
 				soundOn = false;

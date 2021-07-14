@@ -50,6 +50,7 @@ class Laser extends Entity {
 			shoot();
 			CollisionEngine.overlap(GlobalGameData.worldMap.collision,laserCollision,laserOnWall);
 			collideLaser(GlobalGameData.chell.collision, laserCollision);
+			CollisionEngine.overlap(laserCollision,GlobalGameData.chell.projectionCollision,GlobalGameData.chell.deleteProyection);
 		}
 		super.update(dt);
 	}

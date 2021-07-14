@@ -12,13 +12,16 @@ R-Acción (presionar botón, tomar/dejar cubo)
 
 Las torretas se las mata tocándolas porque se caen y se rompen
 
+Grabé un gameplay por cualquier cosa:
+https://youtu.be/m1OTlJuyZzQ
+(La game bar no me está grabando sonido por eso el gameplay no tiene)
+
 
 Notas:
 
 * A veces surgen problemas con las colisiones de la proyección de la pistola de portales y hay como una "interferencia" que hace que no colisione con un tile.
 
 *Cosas que sé que me faltaron y me hubiera gustado hacer si me hubiera dado el tiempo: 
--poder hacer que los tiles que son grilla no permitan crear portales
 -que las torretas tuvieran su propia projection que al impactar con el jugador ahi recien empezara a disparar y no que sea en una direccion aunque detecta al pj 360*
 -que el personaje cambie de color al recibir daño
 -ponerle grafico a los portales

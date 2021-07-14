@@ -20303,35 +20303,37 @@ gameObjects_Chell.prototype = $extend(com_framework_utils_Entity.prototype,{
 		var x = (currentProjection.collision.x + currentProjection.collision.width / 2) / 32 | 0;
 		var y = (currentProjection.collision.y + currentProjection.collision.height + 1) / 32 | 0;
 		var type = states_GlobalGameData.bloqPortalMap.getTile(x,y);
-		if(com_framework_utils_Input.i.isKeyCodePressed(states_GlobalGameData.orange) || com_framework_utils_Input.i.isKeyCodePressed(states_GlobalGameData.blue)) {
-			var side = 99;
-			if(currentProjection.collision.isTouching(8)) {
-				side = 8;
-			} else if(currentProjection.collision.isTouching(4)) {
-				side = 4;
-			} else if(currentProjection.collision.isTouching(1)) {
-				side = 1;
-			} else if(currentProjection.collision.isTouching(2)) {
-				side = 2;
-			}
-			var posX = currentProjection.collision.lastX;
-			var posY = currentProjection.collision.lastY;
-			if(com_framework_utils_Input.i.isKeyCodePressed(states_GlobalGameData.blue)) {
-				if(states_GlobalGameData.bluePortal != null) {
-					states_GlobalGameData.bluePortal.die();
+		if(type == -1) {
+			if(com_framework_utils_Input.i.isKeyCodePressed(states_GlobalGameData.orange) || com_framework_utils_Input.i.isKeyCodePressed(states_GlobalGameData.blue)) {
+				var side = 99;
+				if(currentProjection.collision.isTouching(8)) {
+					side = 8;
+				} else if(currentProjection.collision.isTouching(4)) {
+					side = 4;
+				} else if(currentProjection.collision.isTouching(1)) {
+					side = 1;
+				} else if(currentProjection.collision.isTouching(2)) {
+					side = 2;
 				}
-				this.bluePortal = new gameObjects_BluePortal(posX,posY,this.blueCollision,side);
-				states_GlobalGameData.bluePortal = this.bluePortal;
-				this.addChild(this.bluePortal);
-				com_soundLib_SoundManager.playFx("bluePortal");
-			} else {
-				if(states_GlobalGameData.orangePortal != null) {
-					states_GlobalGameData.orangePortal.die();
+				var posX = currentProjection.collision.lastX;
+				var posY = currentProjection.collision.lastY;
+				if(com_framework_utils_Input.i.isKeyCodePressed(states_GlobalGameData.blue)) {
+					if(states_GlobalGameData.bluePortal != null) {
+						states_GlobalGameData.bluePortal.die();
+					}
+					this.bluePortal = new gameObjects_BluePortal(posX,posY,this.blueCollision,side);
+					states_GlobalGameData.bluePortal = this.bluePortal;
+					this.addChild(this.bluePortal);
+					com_soundLib_SoundManager.playFx("bluePortal");
+				} else {
+					if(states_GlobalGameData.orangePortal != null) {
+						states_GlobalGameData.orangePortal.die();
+					}
+					this.orangePortal = new gameObjects_OrangePortal(posX,posY,this.orangeCollision,side);
+					states_GlobalGameData.orangePortal = this.orangePortal;
+					this.addChild(this.orangePortal);
+					com_soundLib_SoundManager.playFx("orangePortal");
 				}
-				this.orangePortal = new gameObjects_OrangePortal(posX,posY,this.orangeCollision,side);
-				states_GlobalGameData.orangePortal = this.orangePortal;
-				this.addChild(this.orangePortal);
-				com_soundLib_SoundManager.playFx("orangePortal");
 			}
 		}
 		currentProjection.die();
@@ -20658,6 +20660,7 @@ gameObjects_Laser.prototype = $extend(com_framework_utils_Entity.prototype,{
 			this.addChild(laserBeam);
 			com_collision_platformer_CollisionEngine.overlap(states_GlobalGameData.worldMap.collision,this.laserCollision,$bind(this,this.laserOnWall));
 			this.collideLaser(states_GlobalGameData.chell.collision,this.laserCollision);
+			com_collision_platformer_CollisionEngine.overlap(this.laserCollision,states_GlobalGameData.chell.projectionCollision,($_=states_GlobalGameData.chell,$bind($_,$_.deleteProyection)));
 		}
 		com_framework_utils_Entity.prototype.update.call(this,dt);
 	}
@@ -23872,8 +23875,8 @@ var kha__$Assets_ImageList = function() {
 	this.laserDescription = { name : "laser", original_height : 32, file_sizes : [237], original_width : 32, files : ["laser.png"], type : "image"};
 	this.laserName = "laser";
 	this.laser = null;
-	this.introSize = 32622;
-	this.introDescription = { name : "intro", original_height : 690, file_sizes : [32622], original_width : 1300, files : ["intro.png"], type : "image"};
+	this.introSize = 23020;
+	this.introDescription = { name : "intro", original_height : 720, file_sizes : [23020], original_width : 1280, files : ["intro.png"], type : "image"};
 	this.introName = "intro";
 	this.intro = null;
 	this.cuboSize = 871;
@@ -24245,45 +24248,29 @@ kha__$Assets_SoundList.prototype = {
 	,__class__: kha__$Assets_SoundList
 };
 var kha__$Assets_BlobList = function() {
-	this.names = ["boton1_xcf","boton2_xcf","botonPuerta_xcf","chell_xcf","cubo_xcf","intro_xcf","laser_xcf","portal_xcf","puerta_xcf","room1_tmx","room1_vacia_tmx","room2_tmx","room2_vacia_tmx","room3_tmx","roomFinal_tmx","testRoom_tmx","tilesPortal_tsx","tilesPortal_xcf","torreta_xcf"];
+	this.names = ["boton1_xcf","boton2_xcf","botonPuerta_xcf","chell_xcf","cubo_xcf","intro_xcf","laser_xcf","portal_xcf","puerta_xcf","room1_tmx","room2_tmx","roomFinal_tmx","tilesPortal_tsx","tilesPortal_xcf","torreta_xcf"];
 	this.torreta_xcfSize = 72947;
 	this.torreta_xcfDescription = { name : "torreta_xcf", file_sizes : [72947], files : ["torreta.xcf"], type : "blob"};
 	this.torreta_xcfName = "torreta_xcf";
 	this.torreta_xcf = null;
-	this.tilesPortal_xcfSize = 24533;
-	this.tilesPortal_xcfDescription = { name : "tilesPortal_xcf", file_sizes : [24533], files : ["tilesPortal.xcf"], type : "blob"};
+	this.tilesPortal_xcfSize = 24013;
+	this.tilesPortal_xcfDescription = { name : "tilesPortal_xcf", file_sizes : [24013], files : ["tilesPortal.xcf"], type : "blob"};
 	this.tilesPortal_xcfName = "tilesPortal_xcf";
 	this.tilesPortal_xcf = null;
 	this.tilesPortal_tsxSize = 235;
 	this.tilesPortal_tsxDescription = { name : "tilesPortal_tsx", file_sizes : [235], files : ["tilesPortal.tsx"], type : "blob"};
 	this.tilesPortal_tsxName = "tilesPortal_tsx";
 	this.tilesPortal_tsx = null;
-	this.testRoom_tmxSize = 7075;
-	this.testRoom_tmxDescription = { name : "testRoom_tmx", file_sizes : [7075], files : ["testRoom.tmx"], type : "blob"};
-	this.testRoom_tmxName = "testRoom_tmx";
-	this.testRoom_tmx = null;
 	this.roomFinal_tmxSize = 19243;
 	this.roomFinal_tmxDescription = { name : "roomFinal_tmx", file_sizes : [19243], files : ["roomFinal.tmx"], type : "blob"};
 	this.roomFinal_tmxName = "roomFinal_tmx";
 	this.roomFinal_tmx = null;
-	this.room3_tmxSize = 32696;
-	this.room3_tmxDescription = { name : "room3_tmx", file_sizes : [32696], files : ["room3.tmx"], type : "blob"};
-	this.room3_tmxName = "room3_tmx";
-	this.room3_tmx = null;
-	this.room2_vacia_tmxSize = 32733;
-	this.room2_vacia_tmxDescription = { name : "room2_vacia_tmx", file_sizes : [32733], files : ["room2_vacia.tmx"], type : "blob"};
-	this.room2_vacia_tmxName = "room2_vacia_tmx";
-	this.room2_vacia_tmx = null;
-	this.room2_tmxSize = 34230;
-	this.room2_tmxDescription = { name : "room2_tmx", file_sizes : [34230], files : ["room2.tmx"], type : "blob"};
+	this.room2_tmxSize = 34225;
+	this.room2_tmxDescription = { name : "room2_tmx", file_sizes : [34225], files : ["room2.tmx"], type : "blob"};
 	this.room2_tmxName = "room2_tmx";
 	this.room2_tmx = null;
-	this.room1_vacia_tmxSize = 32733;
-	this.room1_vacia_tmxDescription = { name : "room1_vacia_tmx", file_sizes : [32733], files : ["room1_vacia.tmx"], type : "blob"};
-	this.room1_vacia_tmxName = "room1_vacia_tmx";
-	this.room1_vacia_tmx = null;
-	this.room1_tmxSize = 33792;
-	this.room1_tmxDescription = { name : "room1_tmx", file_sizes : [33792], files : ["room1.tmx"], type : "blob"};
+	this.room1_tmxSize = 33743;
+	this.room1_tmxDescription = { name : "room1_tmx", file_sizes : [33743], files : ["room1.tmx"], type : "blob"};
 	this.room1_tmxName = "room1_tmx";
 	this.room1_tmx = null;
 	this.puerta_xcfSize = 64324;
@@ -24298,8 +24285,8 @@ var kha__$Assets_BlobList = function() {
 	this.laser_xcfDescription = { name : "laser_xcf", file_sizes : [2721], files : ["laser.xcf"], type : "blob"};
 	this.laser_xcfName = "laser_xcf";
 	this.laser_xcf = null;
-	this.intro_xcfSize = 81515;
-	this.intro_xcfDescription = { name : "intro_xcf", file_sizes : [81515], files : ["intro.xcf"], type : "blob"};
+	this.intro_xcfSize = 69588;
+	this.intro_xcfDescription = { name : "intro_xcf", file_sizes : [69588], files : ["intro.xcf"], type : "blob"};
 	this.intro_xcfName = "intro_xcf";
 	this.intro_xcf = null;
 	this.cubo_xcfSize = 4585;
@@ -24459,19 +24446,6 @@ kha__$Assets_BlobList.prototype = {
 		this.room1_tmx.unload();
 		this.room1_tmx = null;
 	}
-	,room1_vacia_tmx: null
-	,room1_vacia_tmxName: null
-	,room1_vacia_tmxDescription: null
-	,room1_vacia_tmxSize: null
-	,room1_vacia_tmxLoad: function(done,failure) {
-		kha_Assets.loadBlob("room1_vacia_tmx",function(blob) {
-			done();
-		},failure,{ fileName : "kha/internal/AssetsBuilder.hx", lineNumber : 144, className : "kha._Assets.BlobList", methodName : "room1_vacia_tmxLoad"});
-	}
-	,room1_vacia_tmxUnload: function() {
-		this.room1_vacia_tmx.unload();
-		this.room1_vacia_tmx = null;
-	}
 	,room2_tmx: null
 	,room2_tmxName: null
 	,room2_tmxDescription: null
@@ -24485,32 +24459,6 @@ kha__$Assets_BlobList.prototype = {
 		this.room2_tmx.unload();
 		this.room2_tmx = null;
 	}
-	,room2_vacia_tmx: null
-	,room2_vacia_tmxName: null
-	,room2_vacia_tmxDescription: null
-	,room2_vacia_tmxSize: null
-	,room2_vacia_tmxLoad: function(done,failure) {
-		kha_Assets.loadBlob("room2_vacia_tmx",function(blob) {
-			done();
-		},failure,{ fileName : "kha/internal/AssetsBuilder.hx", lineNumber : 144, className : "kha._Assets.BlobList", methodName : "room2_vacia_tmxLoad"});
-	}
-	,room2_vacia_tmxUnload: function() {
-		this.room2_vacia_tmx.unload();
-		this.room2_vacia_tmx = null;
-	}
-	,room3_tmx: null
-	,room3_tmxName: null
-	,room3_tmxDescription: null
-	,room3_tmxSize: null
-	,room3_tmxLoad: function(done,failure) {
-		kha_Assets.loadBlob("room3_tmx",function(blob) {
-			done();
-		},failure,{ fileName : "kha/internal/AssetsBuilder.hx", lineNumber : 144, className : "kha._Assets.BlobList", methodName : "room3_tmxLoad"});
-	}
-	,room3_tmxUnload: function() {
-		this.room3_tmx.unload();
-		this.room3_tmx = null;
-	}
 	,roomFinal_tmx: null
 	,roomFinal_tmxName: null
 	,roomFinal_tmxDescription: null
@@ -24523,19 +24471,6 @@ kha__$Assets_BlobList.prototype = {
 	,roomFinal_tmxUnload: function() {
 		this.roomFinal_tmx.unload();
 		this.roomFinal_tmx = null;
-	}
-	,testRoom_tmx: null
-	,testRoom_tmxName: null
-	,testRoom_tmxDescription: null
-	,testRoom_tmxSize: null
-	,testRoom_tmxLoad: function(done,failure) {
-		kha_Assets.loadBlob("testRoom_tmx",function(blob) {
-			done();
-		},failure,{ fileName : "kha/internal/AssetsBuilder.hx", lineNumber : 144, className : "kha._Assets.BlobList", methodName : "testRoom_tmxLoad"});
-	}
-	,testRoom_tmxUnload: function() {
-		this.testRoom_tmx.unload();
-		this.testRoom_tmx = null;
 	}
 	,tilesPortal_tsx: null
 	,tilesPortal_tsxName: null
@@ -54660,7 +54595,6 @@ states_GameState.prototype = $extend(com_framework_utils_State.prototype,{
 	,load: function(resources) {
 		resources.add(new com_loading_basicResources_DataLoader("room" + this.room + "_tmx"));
 		var atlas = new com_loading_basicResources_JoinAtlas(2048,2048);
-		atlas.add(new com_loading_basicResources_FontLoader("Kenney_Thick",20));
 		atlas.add(new com_loading_basicResources_TilesheetLoader("tilesPortal",32,32,0));
 		atlas.add(new com_loading_basicResources_SpriteSheetLoader("chell",45,60,0,[new com_loading_basicResources_Sequence("fall",[0]),new com_loading_basicResources_Sequence("slide",[1]),new com_loading_basicResources_Sequence("jump",[0]),new com_loading_basicResources_Sequence("run",[2,3,4,5,6,7]),new com_loading_basicResources_Sequence("idle",[10])]));
 		atlas.add(new com_loading_basicResources_SpriteSheetLoader("torreta",50,60,0,[new com_loading_basicResources_Sequence("idle",[0]),new com_loading_basicResources_Sequence("open",[1,2]),new com_loading_basicResources_Sequence("falling",[3]),new com_loading_basicResources_Sequence("detect",[0,4]),new com_loading_basicResources_Sequence("fall",[5,6,7]),new com_loading_basicResources_Sequence("death",[8,9,10,11])]));
@@ -54684,13 +54618,6 @@ states_GameState.prototype = $extend(com_framework_utils_State.prototype,{
 		this.stage.addChild(this.simulationLayer);
 		this.hudLayer = new com_gEngine_display_StaticLayer();
 		this.stage.addChild(this.hudLayer);
-		this.text = new com_gEngine_display_Text("Kenney_Thick");
-		var tmp = kha_System.windowWidth() * 0.5;
-		this.text.x = tmp - 50;
-		var tmp = kha_System.windowHeight();
-		this.text.y = tmp * 0.5;
-		this.text.set_text("");
-		this.stage.addChild(this.text);
 		states_GlobalGameData.simulationLayer = this.simulationLayer;
 		states_GlobalGameData.gatewayCollision = this.gatewayCollision;
 		this.worldMap = new com_collision_platformer_Tilemap("room" + this.room + "_tmx");
@@ -54722,7 +54649,6 @@ states_GameState.prototype = $extend(com_framework_utils_State.prototype,{
 	}
 	,parseTileLayers: function(layerTilemap,tileLayer) {
 		if(tileLayer.properties.exists("noPortal")) {
-			layerTilemap.createCollisions(tileLayer);
 			this.bloqPortalMap = layerTilemap.createDisplay(tileLayer,new com_gEngine_display_Sprite("tilesPortal"));
 			this.simulationLayer.addChild(this.bloqPortalMap);
 		} else {

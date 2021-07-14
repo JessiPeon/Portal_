@@ -56,8 +56,6 @@ class GameState extends State {
 	var simulationLayer:Layer;
 	var hudLayer:StaticLayer;
 	var touchJoystick:VirtualGamepad;
-	//var tray:helpers.Tray;
-	//var mayonnaiseMap:TileMapDisplay;
 	var bloqPortalMap:TileMapDisplay;
 	var room:String;
 	var winZone:CollisionBox;
@@ -70,8 +68,6 @@ class GameState extends State {
 	var buttonLaserCollision:CollisionGroup= new CollisionGroup();
 	var laserCollision:CollisionGroup= new CollisionGroup();
 	var cubeCollision:CollisionGroup= new CollisionGroup();
-	//var blueCollision:CollisionGroup= new CollisionGroup();
-	// orangeCollision:CollisionGroup= new CollisionGroup();
 	var text:Text;
 	var displayCube:Sprite;
 
@@ -85,10 +81,6 @@ class GameState extends State {
 		resources.add(new DataLoader("room"+room+"_tmx"));
 		var atlas = new JoinAtlas(2048, 2048);
 
-		//////////////////////////
-        atlas.add(new FontLoader("Kenney_Thick",20));
-
-		//////////////////////////////
 
 		atlas.add(new TilesheetLoader("tilesPortal", 32, 32, 0));
 		atlas.add(new SpriteSheetLoader("chell", 45, 60, 0, [
@@ -135,23 +127,12 @@ class GameState extends State {
 		hudLayer = new StaticLayer();
 		stage.addChild(hudLayer);
 
-		////////////////////////////
-		
-		text=new Text("Kenney_Thick");
-        text.x = Screen.getWidth()*0.5-50;
-        text.y = Screen.getHeight()*0.5;
-        text.text="";
-        stage.addChild(text);
-
-		////////////////////////////
-
 		GlobalGameData.simulationLayer = simulationLayer;
 		GlobalGameData.gatewayCollision = gatewayCollision;
 		worldMap = new Tilemap("room"+room+"_tmx");
 		worldMap.init(parseTileLayers, parseMapObjects);
 		GlobalGameData.worldMap = worldMap;
 		GlobalGameData.bloqPortalMap = bloqPortalMap;
-		//tray = new Tray(mayonnaiseMap);
 		displayCube= new Sprite("cubo");
 		displayCube.smooth = false;
 		displayCube.x=20;
@@ -183,10 +164,7 @@ class GameState extends State {
 
 	function parseTileLayers(layerTilemap:Tilemap, tileLayer:TmxTileLayer) {
 
-		// mayonnaiseMap = layerTilemap.createDisplay(tileLayer);
-		//simulationLayer.addChild(mayonnaiseMap);
 		if (tileLayer.properties.exists("noPortal")){
-			layerTilemap.createCollisions(tileLayer);
 			bloqPortalMap=layerTilemap.createDisplay(tileLayer,new Sprite("tilesPortal"));
 			simulationLayer.addChild(bloqPortalMap);
 		} else {
@@ -301,7 +279,6 @@ class GameState extends State {
 			chell.death();
 		}
 		if(CollisionEngine.overlap(chell.collision,zone2)){
-			//stage.defaultCamera().setTarget(chell.collision.x, chell.collision.y);
 			stage.defaultCamera().setTarget(zone2.x+Screen.getWidth()*0.5, zone2.y);
 			GlobalGameData.camera = stage.defaultCamera();
 			chell.getCube = false;
@@ -324,10 +301,6 @@ class GameState extends State {
 		CollisionEngine.overlap(chell.collision,buttonLaserCollision,chellVsButtonLaser);
 		CollisionEngine.overlap(chell.collision,cubeCollision,chellVsCube);
 		
-
-		//tray.setContactPosition(chell.collision.x + chell.collision.width / 2, chell.collision.y + chell.collision.height + 1, Sides.BOTTOM);
-		//tray.setContactPosition(chell.collision.x + chell.collision.width + 1, chell.collision.y + chell.collision.height / 2, Sides.RIGHT);
-		//tray.setContactPosition(chell.collision.x-1, chell.collision.y+chell.collision.height/2, Sides.LEFT);
 	}
 
 	function chellVsTurret(chellC:ICollider, turretC:ICollider) {

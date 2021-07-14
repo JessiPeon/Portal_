@@ -110,10 +110,9 @@ class Chell extends Entity {
 		var x:Int = Std.int( (currentProjection.collision.x + currentProjection.collision.width / 2) / 32) ;
 		var y:Int = Std.int( (currentProjection.collision.y + currentProjection.collision.height + 1) / 32);
 		var type:Int = GlobalGameData.bloqPortalMap.getTile(x, y);
-		//if (type == 0){
+		if (type == -1){
 			if (Input.i.isKeyCodePressed(GlobalGameData.orange) || Input.i.isKeyCodePressed(GlobalGameData.blue)){
 				var side:Int = 99;
-				
 				if (currentProjection.collision.isTouching(Sides.BOTTOM)) {
 					side = Sides.BOTTOM;
 				} else
@@ -149,7 +148,7 @@ class Chell extends Entity {
 				}
 				
 			}
-		//}
+		}
 		
 		currentProjection.die();
 	}
@@ -228,7 +227,7 @@ class Chell extends Entity {
 		}
 	}
 
-	function deleteProyection(gatewayC:ICollider,projectionsC:ICollider){
+	public function deleteProyection(gatewayC:ICollider,projectionsC:ICollider){
 		var currentProjection:Projection = cast projectionsC.userData;
 		currentProjection.die();
 	}

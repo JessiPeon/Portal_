@@ -630,11 +630,11 @@
 				"intro.png"
 			],
 			"file_sizes": [
-				32622
+				23020
 			],
 			"type": "image",
-			"original_width": 1300,
-			"original_height": 690
+			"original_width": 1280,
+			"original_height": 720
 		},
 		{
 			"name": "intro_xcf",
@@ -642,7 +642,7 @@
 				"intro.xcf"
 			],
 			"file_sizes": [
-				81515
+				69588
 			],
 			"type": "blob"
 		},
@@ -1691,17 +1691,7 @@
 				"room1.tmx"
 			],
 			"file_sizes": [
-				33792
-			],
-			"type": "blob"
-		},
-		{
-			"name": "room1_vacia_tmx",
-			"files": [
-				"room1_vacia.tmx"
-			],
-			"file_sizes": [
-				32733
+				33743
 			],
 			"type": "blob"
 		},
@@ -1711,27 +1701,7 @@
 				"room2.tmx"
 			],
 			"file_sizes": [
-				34230
-			],
-			"type": "blob"
-		},
-		{
-			"name": "room2_vacia_tmx",
-			"files": [
-				"room2_vacia.tmx"
-			],
-			"file_sizes": [
-				32733
-			],
-			"type": "blob"
-		},
-		{
-			"name": "room3_tmx",
-			"files": [
-				"room3.tmx"
-			],
-			"file_sizes": [
-				32696
+				34225
 			],
 			"type": "blob"
 		},
@@ -2404,16 +2374,6 @@
 			]
 		},
 		{
-			"name": "testRoom_tmx",
-			"files": [
-				"testRoom.tmx"
-			],
-			"file_sizes": [
-				7075
-			],
-			"type": "blob"
-		},
-		{
 			"name": "tilesPortal",
 			"files": [
 				"tilesPortal.png"
@@ -2441,7 +2401,7 @@
 				"tilesPortal.xcf"
 			],
 			"file_sizes": [
-				24533
+				24013
 			],
 			"type": "blob"
 		},
