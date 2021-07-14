@@ -13,7 +13,6 @@ import com.gEngine.display.Sprite;
 class Projection extends Entity {
 	var display:RectangleDisplay;
 	public var collision:CollisionBox;
-	//public var portal:KeyCode;
 	var width:Int = 4;
 	var height:Int = 4;
 	var speed:Float = 500;
@@ -26,7 +25,6 @@ class Projection extends Entity {
 		display.scaleX = width;
 		display.scaleY = height;
 		GlobalGameData.simulationLayer.addChild(display);
-		//portal = pressedKey;
 		collision = new CollisionBox();
 		collision.width = width;
 		collision.height = height;

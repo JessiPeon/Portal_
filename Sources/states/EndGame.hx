@@ -1,4 +1,6 @@
 package states;
+import com.soundLib.SoundManager.SM;
+import com.loading.basicResources.SoundLoader;
 import com.loading.basicResources.ImageLoader;
 import com.gEngine.display.Text;
 import com.loading.basicResources.FontLoader;
@@ -36,9 +38,7 @@ class EndGame extends State {
 	var text:Text;
 	var cake:Sprite;
 	var touchJoystick:VirtualGamepad; //temp
-	/*public function new(){
-        super();
-    }*/
+	var soundOn:Bool = true;
 
 	override function load(resources:Resources) {
 		resources.add(new DataLoader("roomFinal_tmx"));
@@ -58,6 +58,9 @@ class EndGame extends State {
 		atlas.add(new ImageLoader("portalAzul"));
 		//atlas.add(new SpriteSheetLoader("cake", 45, 45, 0,[new Sequence("idle", [0])]) );
 		resources.add(atlas);
+		resources.add(new SoundLoader("orangePortal"));
+		resources.add(new SoundLoader("bluePortal"));
+		resources.add(new SoundLoader("StillAlive",false));
 	}
 
 	override function init() {
@@ -79,7 +82,7 @@ class EndGame extends State {
 
 		stage.defaultCamera().limits(32*2, 0, worldMap.widthIntTiles * 32 - 4*32, worldMap.heightInTiles * 32 );
 		GlobalGameData.camera = stage.defaultCamera();
-
+		SM.stopMusic();
 		//temporal hasta poner camino
 		createTouchJoystick();
 	}
@@ -141,6 +144,11 @@ class EndGame extends State {
 		if(CollisionEngine.overlap(chell.collision,creditsZone)){
 			cake.visible = false;
 			text.text="The Cake is a Lie";
+			//soundOn = true;
+			if (soundOn){
+				SM.playMusic("StillAlive");
+				soundOn = false;
+			}
 		}
 		if(Input.i.isKeyCodePressed(GlobalGameData.action) && !cake.visible){
 			this.changeState(new StartGame());

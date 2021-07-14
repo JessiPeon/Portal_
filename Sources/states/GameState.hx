@@ -39,7 +39,8 @@ import com.loading.basicResources.JoinAtlas;
 import com.loading.Resources;
 import com.framework.utils.State;
 import states.EndGame;
-
+import com.loading.basicResources.SoundLoader;
+import com.soundLib.SoundManager.SM;
 
 class GameState extends State {
 	var worldMap:Tilemap;
@@ -118,7 +119,13 @@ class GameState extends State {
 			new Sequence("falling", [1])
 		]));
 		resources.add(atlas);
-		
+		resources.add(new SoundLoader("orangePortal"));
+		resources.add(new SoundLoader("bluePortal"));
+		resources.add(new SoundLoader("laserButton"));
+		resources.add(new SoundLoader("gatewayButton"));
+		resources.add(new SoundLoader("bullets"));
+		resources.add(new SoundLoader("r1",false));
+		resources.add(new SoundLoader("r2",false));
 	}
 
 	override function init() {
@@ -157,6 +164,8 @@ class GameState extends State {
 		stage.defaultCamera().limits(32*2, 0, worldMap.widthIntTiles * 32 - 4*32, worldMap.heightInTiles * 32 -16 );
 		GlobalGameData.camera = stage.defaultCamera();
 		createTouchJoystick();
+
+		SM.playMusic("r"+room);
 	}
 
 	function createTouchJoystick() {
@@ -264,10 +273,6 @@ class GameState extends State {
 
 	override function update(dt:Float) {
 		super.update(dt);
-		//stage.defaultCamera().setTarget(chell.collision.x, chell.collision.y);
-		#if DEBUGDRAW
-		text.text = Std.string(chell.collision.accelerationX) + " " + Std.string(chell.collision.accelerationY)  + " - " +Std.string(Math.round(chell.collision.velocityX)) + " " + Std.string(Math.round(chell.collision.velocityY));
-		#end
 
 		if (chell.getVida() <= 0){
 			changeState(new LoseGame());
@@ -288,6 +293,7 @@ class GameState extends State {
 				var nuevaRoomInt:Int = cast room;
 				nuevaRoomInt += 1;
 				var nuevaRoom:String = cast nuevaRoomInt;
+				SM.stopMusic();
 				changeState(new GameState(nuevaRoom,room));
 			}
 		}
@@ -302,10 +308,14 @@ class GameState extends State {
 			CollisionEngine.collide(chell.collision,back);
 			back.staticObject=true;
 			if (GlobalGameData.bluePortal != null){
-				GlobalGameData.bluePortal.die();
+				GlobalGameData.bluePortal.collision.x=zone2.x;
+				GlobalGameData.bluePortal.collision.y=zone2.y;
+				GlobalGameData.bluePortal.display.visible=false;
 			}
 			if (GlobalGameData.orangePortal != null){
-				GlobalGameData.orangePortal.die();
+				GlobalGameData.orangePortal.collision.x=zone2.x;
+				GlobalGameData.orangePortal.collision.y=zone2.y;
+				GlobalGameData.orangePortal.display.visible=false;
 			}
 		}
 		
@@ -340,18 +350,15 @@ class GameState extends State {
 			hudLayer.visible = false;
 			currentButton.gateway.openGateway();
 			currentButton.destroy();
+			SM.playFx("gatewayButton");
 		}
-	}
-	inline function cubeVsButtonGateway(chellC:ICollider,buttonC:ICollider){
-		var currentButton:ButtonGateway = cast buttonC.userData;
-		currentButton.gateway.openGateway();
-		currentButton.destroy();
 	}
 	inline function chellVsButtonLaser(chellC:ICollider,buttonC:ICollider){
 		if (Input.i.isKeyCodePressed(GlobalGameData.action)){
 			var currentButton:ButtonLaser = cast buttonC.userData;
 			currentButton.laser.destroy();
 			currentButton.destroy();
+			SM.playFx("laserButton");
 		}
 	}
 	inline function chellVsCube(chellC:ICollider,cubeC:ICollider){

@@ -51,7 +51,6 @@ class Laser extends Entity {
 			CollisionEngine.overlap(GlobalGameData.worldMap.collision,laserCollision,laserOnWall);
 			collideLaser(GlobalGameData.chell.collision, laserCollision);
 		}
-		
 		super.update(dt);
 	}
 
@@ -75,7 +74,7 @@ class Laser extends Entity {
 
 	function laserOnWall(wallC:ICollider, laserC:ICollider) {
 		var currentLaser:Bullet = cast laserC.userData;
-		currentLaser.destroy();
+		currentLaser.die();
 	}
 	
 
@@ -90,7 +89,6 @@ class Laser extends Entity {
 		on = false;
 		laserCollision.clear();
 		super.destroy();
-		//display.removeFromParent();
         collision.removeFromParent();
 	}
 

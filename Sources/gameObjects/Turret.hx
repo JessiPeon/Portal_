@@ -1,5 +1,6 @@
 package gameObjects;
 
+import com.soundLib.SoundManager.SM;
 import com.collision.platformer.ICollider;
 import com.collision.platformer.CollisionEngine;
 import com.framework.utils.Entity;
@@ -45,7 +46,6 @@ class Turret extends Entity {
 		collision.userData = this;
 
 		collision.accelerationY = 2000;
-		//collision.dragX = 0.9;
         bulletsCollision=new CollisionGroup();
 		
     }
@@ -72,10 +72,10 @@ class Turret extends Entity {
 	inline function detectChell() {
 		facingDir2.x = GlobalGameData.chell.collision.x - collision.x;
 		facingDir2.y = GlobalGameData.chell.collision.y - collision.y;
-		//facingDir.setFrom(facingDir.normalized());
 		var dist:Float = Math.sqrt(facingDir2.x * facingDir2.x + facingDir2.y * facingDir2.y);
 		if (dist < 400){
 			shoot();
+			//SM.playFx("bullets");
 		}
 	}
 
@@ -87,12 +87,12 @@ class Turret extends Entity {
 	function chellVsBullet(chellC:ICollider, bulletC:ICollider) {
 		var currentBullet:Bullet = cast bulletC.userData;
 		GlobalGameData.chell.damage();
-		currentBullet.destroy();
+		currentBullet.die();
 	}
 
 	function deleteBullet(wallC:ICollider, bulletC:ICollider) {
 		var currentBullet:Bullet = cast bulletC.userData;
-		currentBullet.destroy();
+		currentBullet.die();
 	}
 	
 
@@ -111,6 +111,7 @@ class Turret extends Entity {
 
 	public function damage() {
 		bulletsCollision.clear();
+		SM.playFx("bullets");
 		display.timeline.playAnimation("falling",false);
 		display.timeline.playAnimation("fall",false);
 		display.timeline.playAnimation("fall",false);

@@ -41,19 +41,7 @@ class Cube extends Entity {
 		collision.userData = this;
 		
     }
-/*
-	public function new(x:Float,y:Float) {
-        super();
-		display = new Sprite("cubo");
-		display.smooth = false;
-		display.x=x;
-		display.y=y;
-		GlobalGameData.simulationLayer.addChild(display);
 
-        display.scaleX = display.scaleY = 1;
-		
-    }
-*/
 	override function update(dt:Float) {
 		
 		super.update(dt);

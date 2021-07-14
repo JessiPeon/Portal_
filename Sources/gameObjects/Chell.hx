@@ -1,5 +1,6 @@
 package gameObjects;
 
+import com.soundLib.SoundManager.SM;
 import js.lib.webassembly.Global;
 import com.collision.platformer.ICollider;
 import com.collision.platformer.CollisionEngine;
@@ -32,7 +33,6 @@ class Chell extends Entity {
 	var deadChell = false;
 	var lastAccelerationX:Float;
 	var lastAccelerationY:Float;
-	//var lastWallGrabing:Float=0;
 	var sideTouching:Int;
 	var time:Float = 0;
 
@@ -71,21 +71,6 @@ class Chell extends Entity {
 		if (life < maxLife && life > 0 && !deadChell){
 			life += 10;
 		}
-		var frenar = false;
-		/*if (collision.accelerationX > 2*maxSpeed){
-			//frenar=true;
-			collision.accelerationX=2*maxSpeed;
-			collision.dragX = 0.1;
-		} else {
-			collision.dragX = 0.3;
-		}*/
-		/*if (frenar){
-			time += dt;
-			if (time >= 1 ) {
-				collision.accelerationX=maxSpeed;
-				frenar=false;
-			}
-		}*/
 		
 		if (projectionCollision != null){
 			collidePortalOnWall(GlobalGameData.worldMap.collision,projectionCollision,portalOnWall);
@@ -152,6 +137,7 @@ class Chell extends Entity {
 					bluePortal = new BluePortal(posX, posY,blueCollision,side);
 					GlobalGameData.bluePortal = bluePortal;
 					addChild(bluePortal);
+					SM.playFx("bluePortal");
 				} else {
 					if (GlobalGameData.orangePortal != null){
 						GlobalGameData.orangePortal.die();
@@ -159,6 +145,7 @@ class Chell extends Entity {
 					orangePortal = new OrangePortal(posX, posY,orangeCollision,side);
 					GlobalGameData.orangePortal = orangePortal;
 					addChild(orangePortal);
+					SM.playFx("orangePortal");
 				}
 				
 			}
@@ -186,7 +173,6 @@ class Chell extends Entity {
 		changePosition(posXFin,posYFin);
 		changeDirection();
 
-		
 		
 	}
 
@@ -312,20 +298,14 @@ class Chell extends Entity {
 	}
 
 	public function damage() {
-		//display.timeline.playAnimation("fall",false);/
 		life = life - 200;
     }
 
 	public function death() {
-		//display.timeline.playAnimation("fall",false);/
 		deadChell = true;
 		life = life -500;
     }
-/*
-	inline function isWallGrabing():Bool {
-		return !collision.isTouching(Sides.BOTTOM) && (collision.isTouching(Sides.LEFT) || collision.isTouching(Sides.RIGHT));
-	}
-*/
+
 	public function onAxisChange(id:Int, value:Float) {
 
 	}

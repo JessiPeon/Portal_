@@ -30,10 +30,8 @@ class Portal extends Entity{
 		facingDir = new FastVector2(-1,0);
 		facingDir2 = new FastVector2(-1,0);
 		death = false;
-		//display = new Sprite("torreta");
 		display = new RectangleDisplay();
 		
-		//display.setColor(0, 0, 255);
 		display.scaleX = display.scaleY = 10;
 		GlobalGameData.simulationLayer.addChild(display);
 		side = sideP;
@@ -50,17 +48,11 @@ class Portal extends Entity{
     }
 
 	override function update(dt:Float) {
-
-
 		super.update(dt);
 	}
 	
 	override function render() {
 		super.render();
-		/*if (collision.isTouching(Sides.BOTTOM) && !death) {
-			display.timeline.playAnimation("idle");
-		}
-        */
 		display.x = collision.x;
 		display.y = collision.y;
 	}

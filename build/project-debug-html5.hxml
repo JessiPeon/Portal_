@@ -9,7 +9,6 @@
 -cp C:\Users\jessi\Desktop\Videojuegos\ORT\portalObligatorio\portal\khawy\Libraries\Format
 -D hxcpp_smart_strings
 -D debugInfo
--D DEBUGDRAW
 -D hxGeomAlgo
 -D Format
 -D tiled

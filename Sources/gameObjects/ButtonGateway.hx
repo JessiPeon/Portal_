@@ -62,7 +62,6 @@ class ButtonGateway extends Entity {
 
 	override function destroy() {
 		super.destroy();
-		//display.removeFromParent();
         collision.removeFromParent();
 	}
 

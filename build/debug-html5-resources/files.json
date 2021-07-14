@@ -101,6 +101,16 @@
 			"types": []
 		},
 		{
+			"name": "StillAlive",
+			"files": [
+				"StillAlive.ogg"
+			],
+			"file_sizes": [
+				1893001
+			],
+			"type": "sound"
+		},
+		{
 			"name": "alpha_vert",
 			"files": [
 				"alpha.vert.essl",
@@ -167,6 +177,16 @@
 					]
 				}
 			]
+		},
+		{
+			"name": "bluePortal",
+			"files": [
+				"bluePortal.ogg"
+			],
+			"file_sizes": [
+				12018
+			],
+			"type": "sound"
 		},
 		{
 			"name": "blurFragmentShader_frag",
@@ -335,6 +355,16 @@
 			"type": "blob"
 		},
 		{
+			"name": "bullets",
+			"files": [
+				"bullets.ogg"
+			],
+			"file_sizes": [
+				9433
+			],
+			"type": "sound"
+		},
+		{
 			"name": "cake",
 			"files": [
 				"cake.png"
@@ -493,6 +523,16 @@
 			"types": []
 		},
 		{
+			"name": "gatewayButton",
+			"files": [
+				"gatewayButton.ogg"
+			],
+			"file_sizes": [
+				16975
+			],
+			"type": "sound"
+		},
+		{
 			"name": "hBlurVertexShader_vert",
 			"files": [
 				"hBlurVertexShader.vert.essl",
@@ -617,6 +657,16 @@
 			"type": "image",
 			"original_width": 32,
 			"original_height": 32
+		},
+		{
+			"name": "laserButton",
+			"files": [
+				"laserButton.ogg"
+			],
+			"file_sizes": [
+				14537
+			],
+			"type": "sound"
 		},
 		{
 			"name": "laser_xcf",
@@ -959,6 +1009,16 @@
 				}
 			],
 			"types": []
+		},
+		{
+			"name": "orangePortal",
+			"files": [
+				"orangePortal.ogg"
+			],
+			"file_sizes": [
+				12283
+			],
+			"type": "sound"
 		},
 		{
 			"name": "outline_frag",
@@ -1542,6 +1602,26 @@
 			"type": "blob"
 		},
 		{
+			"name": "r1",
+			"files": [
+				"r1.ogg"
+			],
+			"file_sizes": [
+				1789853
+			],
+			"type": "sound"
+		},
+		{
+			"name": "r2",
+			"files": [
+				"r2.ogg"
+			],
+			"file_sizes": [
+				2473958
+			],
+			"type": "sound"
+		},
+		{
 			"name": "renderAreaTint_frag",
 			"files": [
 				"renderAreaTint.frag.essl",
@@ -1606,22 +1686,22 @@
 			"types": []
 		},
 		{
-			"name": "room1_base_tmx",
-			"files": [
-				"room1 base.tmx"
-			],
-			"file_sizes": [
-				32742
-			],
-			"type": "blob"
-		},
-		{
 			"name": "room1_tmx",
 			"files": [
 				"room1.tmx"
 			],
 			"file_sizes": [
-				33722
+				33792
+			],
+			"type": "blob"
+		},
+		{
+			"name": "room1_vacia_tmx",
+			"files": [
+				"room1_vacia.tmx"
+			],
+			"file_sizes": [
+				32733
 			],
 			"type": "blob"
 		},
@@ -1632,6 +1712,16 @@
 			],
 			"file_sizes": [
 				34230
+			],
+			"type": "blob"
+		},
+		{
+			"name": "room2_vacia_tmx",
+			"files": [
+				"room2_vacia.tmx"
+			],
+			"file_sizes": [
+				32733
 			],
 			"type": "blob"
 		},
@@ -1651,7 +1741,7 @@
 				"roomFinal.tmx"
 			],
 			"file_sizes": [
-				19255
+				19243
 			],
 			"type": "blob"
 		},

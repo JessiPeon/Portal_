@@ -44,9 +44,6 @@ class Gateway extends Entity {
 
     override function update(dt:Float) {
 		super.update(dt);
-        /*if (open) {
-            display.timeline.playAnimation("open",false);
-        }*/
         collision.update(dt);
 	}
 	
@@ -54,10 +51,7 @@ class Gateway extends Entity {
 		super.render();
         if (!open) {
             display.timeline.playAnimation("idle");
-        } else {
-            //display.visible = false;
-        }
-		//
+        } 
 		display.x = collision.x;
 		display.y = collision.y;
 	}

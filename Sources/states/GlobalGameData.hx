@@ -23,8 +23,6 @@ class GlobalGameData {
 	static public var action:KeyCode = KeyCode.R;
 	static public var camera:Camera;
 	static public var bloqPortalMap:TileMapDisplay;
-    //static public var screenWidth:Int = 1280;
-    //static public var screenHeight:Int = 720;
 
 	static public function destroy() {
 		simulationLayer = null;
